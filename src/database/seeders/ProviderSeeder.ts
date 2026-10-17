@@ -19,7 +19,7 @@ export class ProviderSeeder extends Seeder {
       em.create(Provider, { name: value, id: value });
     });
 
-    const modelId = 'gemini-flash-3.5';
+    const modelId = 'gemini-3.5-flash-lite';
     const model = await em.findOne(AIModel, {
       id: modelId,
     });
