@@ -8,5 +8,6 @@ import { RemoveApiKey } from './use-cases/remove-api-key.use-case.js';
 @Module({
   controllers: [ProvidersController],
   providers: [AddApiKey, GetConfiguredProviders, GetModel, RemoveApiKey],
+  exports: [GetModel],
 })
 export class ProvidersModule {}
