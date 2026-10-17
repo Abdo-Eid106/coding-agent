@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, isUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateSessionDto {
   @IsOptional()

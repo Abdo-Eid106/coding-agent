@@ -11,8 +11,8 @@ export default defineConfig({
   entities,
   extensions: [Migrator, SeedManager],
   migrations: {
-    path: 'dist/db/migrations',
-    pathTs: 'src/db/migrations',
+    path: 'dist/database/migrations',
+    pathTs: 'src/database/migrations',
     glob: '!(*.d).{js,ts,cjs}',
     silent: false,
     transactional: true,
@@ -25,8 +25,8 @@ export default defineConfig({
     emit: 'ts',
   },
   seeder: {
-    path: 'dist/db/seeders',
-    pathTs: 'src/db/seeders',
+    path: 'dist/database/seeders',
+    pathTs: 'src/database/seeders',
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
     emit: 'ts', // seeder generation mode
