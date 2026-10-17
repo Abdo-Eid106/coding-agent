@@ -87,18 +87,18 @@ describe('get messages use case (integration)', () => {
     expect(result.nextCursor).toBeDefined();
   });
 
-  // it('should return the correct cursor', async () => {
-  //   const session = new SessionFactory(em).makeOne();
-  //   new MessageFactory(em).make(21, {
-  //     session,
-  //   });
-  //   await em.flush();
+  it('should return the correct cursor', async () => {
+    const session = new SessionFactory(em).makeOne();
+    new MessageFactory(em).make(21, {
+      session,
+    });
+    await em.flush();
 
-  //   const result = await useCase.execute(session.id, {});
-  //   const result2 = await useCase.execute(session.id, {
-  //     cursor: result.items.at(0)!.id,
-  //   });
+    const result = await useCase.execute(session.id, {});
+    const result2 = await useCase.execute(session.id, {
+      cursor: result.items.at(0)!.id,
+    });
 
-  //   expect(result.nextCursor).toBe(result2.items[1].id);
-  // });
+    expect(result.nextCursor).toBe(result2.items[0].id);
+  });
 });
