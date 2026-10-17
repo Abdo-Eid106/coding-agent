@@ -13,7 +13,6 @@ import {
   AgentStreamEvent,
   AgentEventEnum,
 } from '../interfaces/agent-stream-event.js';
-import { EntityManager } from '@mikro-orm/core';
 
 interface RunAgentDto {
   threadId: string;
