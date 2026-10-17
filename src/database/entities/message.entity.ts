@@ -24,6 +24,9 @@ export class Message {
   @Property({ type: 'varchar' })
   content: string;
 
+  @Property({ type: 'varchar', nullable: true })
+  modelId?: string & Opt;
+
   @Enum(() => MessageRole)
   role: MessageRole;
 

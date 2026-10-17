@@ -8,6 +8,9 @@ import { ProjectModule } from './modules/projects/projects.module.js';
 import { SessionModule } from './modules/sessions/sessions.module.js';
 import { MessagesModule } from './modules/messages/messages.module.js';
 import { ProvidersModule } from './modules/providers/providers.module.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventsModule } from './modules/events/events.module.js';
+import { AgentModule } from './modules/agent/agent.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -21,6 +24,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     SessionModule,
     MessagesModule,
     ProvidersModule,
+    EventEmitterModule.forRoot({}),
+    EventsModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

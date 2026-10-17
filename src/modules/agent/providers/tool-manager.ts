@@ -1,15 +1,17 @@
-import path from "node:path";
-import { readFile } from "node:fs/promises";
-import { MCPAdapter } from "@langchain/mcp-adapters";
-import type { StructuredToolInterface } from "@langchain/core/tools";
-import { builtInTools } from "./tools/index.js";
+import path from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { MCPAdapter } from '@langchain/mcp-adapters';
+import type { StructuredToolInterface } from '@langchain/core/tools';
+import { builtInTools } from '../tools/index.js';
+import { Injectable } from '@nestjs/common';
 
-const configPath = path.resolve(process.cwd(), "config/mcp.json");
+const configPath = path.resolve(process.cwd(), 'config/mcp.json');
 
 interface McpServerConfig {
   [serverName: string]: any;
 }
 
+@Injectable()
 export class ToolManager {
   private tools: StructuredToolInterface[] = [];
 
@@ -24,7 +26,7 @@ export class ToolManager {
   }
 
   async init() {
-    const rawConfig = await readFile(configPath, "utf8");
+    const rawConfig = await readFile(configPath, 'utf8');
     const config: { servers: McpServerConfig } = JSON.parse(rawConfig);
     const mcpTools: StructuredToolInterface[] = builtInTools;
 

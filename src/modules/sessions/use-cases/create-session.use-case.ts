@@ -4,12 +4,14 @@ import { Project } from '../../../database/entities/project.entity.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSessionDto } from '../dto/create-session.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
-import { createModel } from '../../agent/create-model.js';
+import { createModel } from '../../agent/helpers/create-model.js';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
   Message,
   MessageRole,
 } from '../../../database/entities/message.entity.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AppEvent } from '../../events/enums/app-events.enum.js';
 
 const TITLE_SYSTEM_PROMPT =
   "Generate a short title (max 6 words) for a chat that starts with the user's message. " +
@@ -20,6 +22,7 @@ export class CreateSession {
   constructor(
     private readonly em: EntityManager,
     private readonly getModel: GetModel,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(dto: CreateSessionDto) {
@@ -37,6 +40,11 @@ export class CreateSession {
     });
 
     await this.em.flush();
+
+    this.eventEmitter.emit(AppEvent.AGENT_RUN_REQUESTED, {
+      messageId: message.id,
+    });
+
     return session;
   }
 
