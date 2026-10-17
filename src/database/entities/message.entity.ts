@@ -3,12 +3,13 @@ import {
   Enum,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/decorators/legacy';
 import { randomUUIDv7 } from 'node:crypto';
 import { Session } from './session.entity.js';
-import type { Opt } from '@mikro-orm/core';
+import { Collection, type Opt } from '@mikro-orm/core';
 
 export enum MessageRole {
   USER = 'user',
@@ -31,4 +32,10 @@ export class Message {
 
   @ManyToOne(() => Session, { deleteRule: 'cascade' })
   session: Session;
+
+  @ManyToOne(() => Message, { nullable: true })
+  parentMessage?: Message;
+
+  @OneToMany(() => Message, (message) => message.parentMessage)
+  replies = new Collection<Message>(this);
 }

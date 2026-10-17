@@ -206,6 +206,23 @@
           "enumItems": [],
           "mappedType": "uuid"
         },
+        "parent_message_id": {
+          "name": "parent_message_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
         "role": {
           "name": "role",
           "type": "text",
@@ -266,6 +283,18 @@
       ],
       "triggers": [],
       "foreignKeys": {
+        "message_parent_message_id_foreign": {
+          "columnNames": [
+            "parent_message_id"
+          ],
+          "constraintName": "message_parent_message_id_foreign",
+          "localTableName": "public.message",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.message",
+          "deleteRule": "set null"
+        },
         "message_session_id_foreign": {
           "columnNames": [
             "session_id"

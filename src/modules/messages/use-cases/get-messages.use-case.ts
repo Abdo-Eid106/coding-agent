@@ -15,6 +15,7 @@ export class GetMessages {
     const limit = DEFAULT_LIMIT;
 
     const where: FilterQuery<Message> = {
+      parentMessage: null,
       session: { id: sessionId },
       ...(cursor && { id: { $lte: cursor } }),
     };
@@ -22,6 +23,7 @@ export class GetMessages {
     const rows = await this.em.find(Message, where, {
       orderBy: { id: 'desc' },
       limit: limit + 1,
+      populate: ['replies'],
     });
 
     const hasMore = rows.length > limit;
