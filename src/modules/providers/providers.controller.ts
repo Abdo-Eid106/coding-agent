@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { AddApiKey } from './use-cases/add-api-key.use-case.js';
 import { GetConfiguredProviders } from './use-cases/get-configured-providers.use-case.js';
 import { RemoveApiKey } from './use-cases/remove-api-key.use-case.js';
