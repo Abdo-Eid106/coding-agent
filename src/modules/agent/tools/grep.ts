@@ -1,8 +1,8 @@
-import { tool } from "@langchain/core/tools";
-import { spawn } from "node:child_process";
-import * as rg from "@vscode/ripgrep";
-import path from "node:path";
-import z from "zod";
+import { tool } from '@langchain/core/tools';
+import { spawn } from 'node:child_process';
+import * as rg from '@vscode/ripgrep';
+import path from 'node:path';
+import z from 'zod';
 
 interface GrepOptions {
   directory: string;
@@ -19,27 +19,27 @@ export function grep({
   ignoreCase = false,
   globs = [],
 }: GrepOptions): Promise<string> {
-  const args: string[] = ["--line-number", "--json"];
-  if (!isRegex) args.push("--fixed-strings");
-  if (ignoreCase) args.push("-i");
-  globs.forEach((glob) => args.push("-g", glob));
+  const args: string[] = ['--line-number', '--json'];
+  if (!isRegex) args.push('--fixed-strings');
+  if (ignoreCase) args.push('-i');
+  globs.forEach((glob) => args.push('-g', glob));
 
   return new Promise((resolve, reject) => {
     const child = spawn(rg.rgPath, [
       ...args,
-      "--",
+      '--',
       pattern,
       path.resolve(directory),
     ]);
 
-    let output = "";
-    child.stdout.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
+    let output = '';
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk: string) => {
       output += chunk;
     });
 
-    child.on("error", reject);
-    child.on("close", (code) => {
+    child.on('error', reject);
+    child.on('close', (code) => {
       if (code === 0 || code === 1) {
         resolve(output);
       } else {
@@ -51,31 +51,34 @@ export function grep({
 
 export const grepTool = tool(
   async (input) => {
-    return await grep(input);
+    const content = await grep(input);
+    return { content };
   },
   {
-    name: "grep",
+    name: 'grep',
     description:
-      "Searches file contents in a directory using ripgrep and returns JSON-formatted match lines.",
+      'Searches file contents in a directory using ripgrep and returns JSON-formatted match lines.',
     schema: z.object({
-      directory: z
-        .string()
-        .describe("The directory to search inside."),
-      pattern: z
-        .string()
-        .describe("The text or regex pattern to search for."),
+      directory: z.string().describe('The directory to search inside.'),
+      pattern: z.string().describe('The text or regex pattern to search for.'),
       isRegex: z
         .boolean()
         .optional()
-        .describe("Whether to treat pattern as a regular expression (defaults to false)."),
+        .describe(
+          'Whether to treat pattern as a regular expression (defaults to false).',
+        ),
       ignoreCase: z
         .boolean()
         .optional()
-        .describe("Whether to perform a case-insensitive search (defaults to false)."),
+        .describe(
+          'Whether to perform a case-insensitive search (defaults to false).',
+        ),
       globs: z
         .array(z.string())
         .optional()
-        .describe("Optional glob filters for including or excluding files (e.g., ['*.ts', '!**/test/**'])."),
+        .describe(
+          "Optional glob filters for including or excluding files (e.g., ['*.ts', '!**/test/**']).",
+        ),
     }),
   },
 );

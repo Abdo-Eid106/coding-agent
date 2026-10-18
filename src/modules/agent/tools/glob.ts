@@ -1,7 +1,7 @@
-import { tool } from "@langchain/core/tools";
-import fg from "fast-glob";
-import path from "node:path";
-import z from "zod";
+import { tool } from '@langchain/core/tools';
+import fg from 'fast-glob';
+import path from 'node:path';
+import z from 'zod';
 
 export interface SearchFilesInput {
   directory: string;
@@ -18,10 +18,10 @@ export interface SearchFilesResult {
 }
 
 const DEFAULT_IGNORE = [
-  "**/node_modules/**",
-  "**/.git/**",
-  "**/dist/**",
-  "**/build/**",
+  '**/node_modules/**',
+  '**/.git/**',
+  '**/dist/**',
+  '**/build/**',
 ];
 
 export async function glob({
@@ -53,32 +53,31 @@ export async function glob({
 
 export const globTool = tool(
   async (input) => {
-    const result = await glob(input);
-    return JSON.stringify(result);
+    return await glob(input);
   },
   {
-    name: "glob",
+    name: 'glob',
     description:
-      "Finds files matching a glob pattern inside a directory and returns the matched file paths.",
+      'Finds files matching a glob pattern inside a directory and returns the matched file paths.',
     schema: z.object({
-      directory: z
-        .string()
-        .describe("The base directory to search in."),
+      directory: z.string().describe('The base directory to search in.'),
       pattern: z
         .string()
         .describe("The glob pattern to match files against (e.g., '**/*.ts')."),
       limit: z
         .number()
         .optional()
-        .describe("Maximum number of file results to return (defaults to 100)."),
+        .describe(
+          'Maximum number of file results to return (defaults to 100).',
+        ),
       ignore: z
         .array(z.string())
         .optional()
-        .describe("Additional glob patterns to ignore."),
+        .describe('Additional glob patterns to ignore.'),
       maxDepth: z
         .number()
         .optional()
-        .describe("Maximum directory traversal depth (defaults to 10)."),
+        .describe('Maximum directory traversal depth (defaults to 10).'),
     }),
   },
 );

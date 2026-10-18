@@ -1,7 +1,7 @@
-import { tool } from "@langchain/core/tools";
-import { readdir, stat } from "node:fs/promises";
-import path from "node:path";
-import z from "zod";
+import { tool } from '@langchain/core/tools';
+import { readdir, stat } from 'node:fs/promises';
+import path from 'node:path';
+import z from 'zod';
 
 export interface LsOptions {
   directory: string;
@@ -26,12 +26,12 @@ export async function ls({
   const info = await stat(absolutePath);
 
   if (!info.isDirectory()) {
-    throw new Error("Invalid directory path");
+    throw new Error('Invalid directory path');
   }
 
   const results: {
     name: string;
-    type: "directory" | "file";
+    type: 'directory' | 'file';
     size?: number;
     modifiedAt?: string;
   }[] = [];
@@ -40,7 +40,7 @@ export async function ls({
     const entries = await readdir(currentPath, { withFileTypes: true });
     const filtered = entries.filter(
       (entry) =>
-        (all || !entry.name.startsWith(".")) && !ignore.includes(entry.name),
+        (all || !entry.name.startsWith('.')) && !ignore.includes(entry.name),
     );
     if (sort) {
       filtered.sort((a, b) => {
@@ -55,7 +55,7 @@ export async function ls({
 
       const entryPath = path.join(currentPath, entry.name);
       const relativePath = path.relative(absolutePath, entryPath);
-      const type = entry.isDirectory() ? "directory" : "file";
+      const type = entry.isDirectory() ? 'directory' : 'file';
 
       results.push({
         name: relativePath,
@@ -80,41 +80,40 @@ export async function ls({
 
 export const lsTool = tool(
   async (input) => {
-    const results = await ls(input);
-    return JSON.stringify(results);
+    return await ls(input);
   },
   {
-    name: "ls",
-    description:
-      "Lists files and directories inside a given directory path.",
+    name: 'ls',
+    description: 'Lists files and directories inside a given directory path.',
     schema: z.object({
-      directory: z
-        .string()
-        .describe("The directory path to list contents of."),
+      directory: z.string().describe('The directory path to list contents of.'),
       all: z
         .boolean()
         .optional()
-        .describe("Whether to include hidden dotfiles (defaults to false)."),
+        .describe('Whether to include hidden dotfiles (defaults to false).'),
       sort: z
         .boolean()
         .optional()
-        .describe("Whether to sort directories first and alphabetically (defaults to true)."),
+        .describe(
+          'Whether to sort directories first and alphabetically (defaults to true).',
+        ),
       limit: z
         .number()
         .optional()
-        .describe("Maximum number of entries to return (defaults to 100)."),
+        .describe('Maximum number of entries to return (defaults to 100).'),
       recursive: z
         .boolean()
         .optional()
-        .describe("Whether to list subdirectories recursively (defaults to false)."),
+        .describe(
+          'Whether to list subdirectories recursively (defaults to false).',
+        ),
       maxDepth: z
         .number()
         .optional()
-        .describe("Maximum recursion depth when recursive is true (defaults to 2)."),
-      ignore: z
-        .array(z.string())
-        .optional()
-        .describe("Entry names to ignore."),
+        .describe(
+          'Maximum recursion depth when recursive is true (defaults to 2).',
+        ),
+      ignore: z.array(z.string()).optional().describe('Entry names to ignore.'),
     }),
   },
 );

@@ -1,7 +1,7 @@
-import { tool } from "@langchain/core/tools";
-import { readFile, stat } from "node:fs/promises";
-import path from "node:path";
-import z from "zod";
+import { tool } from '@langchain/core/tools';
+import { readFile, stat } from 'node:fs/promises';
+import path from 'node:path';
+import z from 'zod';
 
 interface viewOptions {
   filePath: string;
@@ -18,11 +18,11 @@ export async function view({
 
   const info = await stat(absolutePath);
   if (!info.isFile()) {
-    throw new Error("Invalid file path");
+    throw new Error('Invalid file path');
   }
 
-  const content = await readFile(absolutePath, "utf8");
-  const lines = content.split("\n");
+  const content = await readFile(absolutePath, 'utf8');
+  const lines = content.split('\n');
 
   const start = startLine ?? 1;
   const end = endLine ?? lines.length;
@@ -30,29 +30,28 @@ export async function view({
   return lines
     .slice(start - 1, end)
     .map((line, index) => `${start + index}\t${line}`)
-    .join("\n");
+    .join('\n');
 }
 
 export const viewTool = tool(
   async (input) => {
-    return await view(input);
+    const content = await view(input);
+    return { content };
   },
   {
-    name: "view",
+    name: 'view',
     description:
-      "Reads a file and returns its contents with 1-based line numbers, optionally sliced between startLine and endLine.",
+      'Reads a file and returns its contents with 1-based line numbers, optionally sliced between startLine and endLine.',
     schema: z.object({
-      filePath: z
-        .string()
-        .describe("The path to the file to view."),
+      filePath: z.string().describe('The path to the file to view.'),
       startLine: z
         .number()
         .optional()
-        .describe("1-based starting line number (inclusive)."),
+        .describe('1-based starting line number (inclusive).'),
       endLine: z
         .number()
         .optional()
-        .describe("1-based ending line number (inclusive)."),
+        .describe('1-based ending line number (inclusive).'),
     }),
   },
 );
