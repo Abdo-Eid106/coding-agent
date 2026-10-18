@@ -21,7 +21,7 @@ export class Message {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUIDv7();
 
-  @Property({ type: 'varchar' })
+  @Property({ type: 'text' })
   content: string;
 
   @Property({ type: 'varchar', nullable: true })
