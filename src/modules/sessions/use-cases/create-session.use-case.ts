@@ -37,6 +37,7 @@ export class CreateSession {
       id: messageId,
       content: messageContent,
       role: MessageRole.USER,
+      modelId: dto.modelId,
     });
 
     await this.em.flush();

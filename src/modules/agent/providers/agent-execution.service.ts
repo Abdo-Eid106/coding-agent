@@ -45,6 +45,7 @@ export class AgentExecutionService {
       const stream = this.agentService.run({
         threadId: message.session.id,
         message: message.content,
+        workingDirectory: message.session.project?.path,
         context,
       });
 
@@ -114,7 +115,7 @@ export class AgentExecutionService {
     const message = await this.em.findOne(
       Message,
       { id: messageId },
-      { populate: ['session'] },
+      { populate: ['session', 'session.project'] },
     );
 
     if (!message) {

@@ -18,6 +18,7 @@ interface RunAgentDto {
   threadId: string;
   context: AgentGraphContext;
   message: string;
+  workingDirectory?: string;
 }
 
 interface ResumeAgentDto {
@@ -38,6 +39,7 @@ export class AgentService {
   async *run(dto: RunAgentDto): AsyncGenerator<AgentStreamEvent> {
     const input: GraphInput = {
       messages: [new HumanMessage(dto.message)],
+      workingDirectory: dto.workingDirectory,
     };
 
     yield* this.stream(input, dto.threadId, dto.context);
