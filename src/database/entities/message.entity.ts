@@ -1,7 +1,6 @@
 import {
   Entity,
   Enum,
-  Index,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -10,6 +9,7 @@ import {
 import { randomUUIDv7 } from 'node:crypto';
 import { Session } from './session.entity.js';
 import { Collection, type Opt } from '@mikro-orm/core';
+import { ToolCall } from './tool-call.entity.js';
 
 export enum MessageRole {
   USER = 'user',
@@ -41,4 +41,7 @@ export class Message {
 
   @OneToMany(() => Message, (message) => message.parentMessage)
   replies = new Collection<Message>(this);
+
+  @OneToMany(() => ToolCall, (toolCall) => toolCall.message)
+  toolCalls = new Collection<ToolCall>(this);
 }
