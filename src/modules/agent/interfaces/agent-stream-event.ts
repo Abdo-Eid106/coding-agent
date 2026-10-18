@@ -8,5 +8,6 @@ export interface AgentStreamEvent {
   type: AgentEventEnum;
   sessionId: string;
   messageId: string;
+  replyId?: string;
   payload: unknown;
 }

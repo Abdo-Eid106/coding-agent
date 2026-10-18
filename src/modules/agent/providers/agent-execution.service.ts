@@ -50,7 +50,10 @@ export class AgentExecutionService {
       });
 
       for await (const event of stream) {
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
+          ...event,
+          replyId: reply.id,
+        });
 
         if (event.type === AgentEventEnum.TOKEN) {
           reply.content += event.payload;
@@ -76,7 +79,10 @@ export class AgentExecutionService {
       });
 
       for await (const event of stream) {
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
+          ...event,
+          replyId: reply.id,
+        });
 
         if (event.type === AgentEventEnum.TOKEN) {
           reply.content += event.payload;

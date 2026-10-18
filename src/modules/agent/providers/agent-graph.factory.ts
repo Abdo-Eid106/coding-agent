@@ -67,7 +67,6 @@ export class AgentGraphFactory {
           runtime.context!.modelConfig;
 
         const tools = await this.toolManager.getTools();
-        console.log('tools = ', tools);
 
         const modelWithTools = createModel({
           provider,
