@@ -56,6 +56,7 @@
     "@vscode/ripgrep": "^1.18.0",
     "cheerio": "^1.2.0",
     "class-validator": "^0.15.1",
+    "cors": "^2.8.6",
     "dotenv": "^18.0.7",
     "fast-glob": "^3.3.3",
     "langchain": "^1.5.16",

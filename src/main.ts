@@ -1,11 +1,23 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'node:path';
 import { AppModule, ObserveInstrument } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     instrument: ObserveInstrument,
     cors: true,
   });
+
+  app.enableCors({
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  });
+
+  // Serve static files from the 'public' directory
+  app.useStaticAssets(join(import.meta.dirname, '..', 'public'), {
+    prefix: '/public/', // optional: configure virtual path prefix
+  });
+
   app.setGlobalPrefix('api');
   await app.listen(process.env.PORT ?? 3000);
 }

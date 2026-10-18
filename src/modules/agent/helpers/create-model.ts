@@ -1,7 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogle } from '@langchain/google';
-import { SystemMessage } from '@langchain/core/messages';
 
 type ModelConfig = {
   provider: string;
