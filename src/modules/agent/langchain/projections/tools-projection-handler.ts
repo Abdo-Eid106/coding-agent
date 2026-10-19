@@ -70,7 +70,7 @@ export class ToolsProjectionHandler {
             toolCallId: event.payload.toolCallId,
           });
           if (!toolCall) return;
-          toolCall.output = data.output;
+          toolCall.output = event.payload.output;
         }
       }
       await this.em.flush();
