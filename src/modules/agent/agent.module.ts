@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ToolManager } from './providers/tool-manager.js';
-import { AgentService } from './providers/agent.service.js';
+import { AgentService } from './langchain/agent.service.js';
 import { AgentEventsHandler } from './providers/agent.event-handler.js';
-import { AgentGraphFactory } from './providers/agent-graph.factory.js';
+import { AgentGraphFactory } from './langchain/agent-graph.factory.js';
 import { AgentExecutionService } from './providers/agent-execution.service.js';
 
 @Module({

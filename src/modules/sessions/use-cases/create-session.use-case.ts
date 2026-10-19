@@ -4,7 +4,7 @@ import { Project } from '../../../database/entities/project.entity.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSessionDto } from '../dto/create-session.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
-import { createModel } from '../../agent/helpers/create-model.js';
+import { createModel } from '../../agent/langchain/create-model.js';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
   Message,

@@ -6,13 +6,16 @@ import {
   StateGraph,
   StateSchema,
   MemorySaver,
+  StreamChannel,
+  ToolsEventData,
+  ProtocolEvent,
 } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { Injectable } from '@nestjs/common';
 import z from 'zod';
 
-import { createModel } from '../helpers/create-model.js';
-import { ToolManager } from './tool-manager.js';
+import { createModel } from './create-model.js';
+import { ToolManager } from '../providers/tool-manager.js';
 
 const createSystemPrompt = (workingDirectory?: string) =>
   new SystemMessage(

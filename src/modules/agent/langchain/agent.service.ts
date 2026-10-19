@@ -12,7 +12,9 @@ import {
 import {
   AgentStreamEvent,
   AgentEventEnum,
+  ToolCallEvent,
 } from '../interfaces/agent-stream-event.js';
+import { toolEventsTransformer } from './tool-event-transformer.js';
 
 interface RunAgentDto {
   threadId: string;
@@ -62,7 +64,22 @@ export class AgentService {
       configurable: { thread_id: threadId },
       context,
       version: 'v3',
+      transformers: [toolEventsTransformer],
     });
+
+    for await (const event of stream.extensions.tools) {
+      yield {
+        type: event.event as AgentEventEnum,
+        sessionId: threadId,
+        messageId: context.messageId,
+        payload: {
+          id: event.tool_call_id,
+          name: event.tool_name,
+          input: event.input,
+          output: event?.output?.lc_kwargs?.content,
+        },
+      };
+    }
 
     for await (const message of stream.messages) {
       for await (const token of message.text) {

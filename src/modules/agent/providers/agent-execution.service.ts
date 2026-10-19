@@ -9,8 +9,8 @@ import {
 import { AIModel } from '../../../database/entities/ai-model.entity.js';
 import { AppEvent } from '../../events/enums/app-events.enum.js';
 import { AgentEventEnum } from '../interfaces/agent-stream-event.js';
-import type { AgentGraphContext } from './agent-graph.factory.js';
-import { AgentService } from './agent.service.js';
+import type { AgentGraphContext } from '../langchain/agent-graph.factory.js';
+import { AgentService } from '../langchain/agent.service.js';
 
 export interface PreparedAgentRun {
   message: Message;
