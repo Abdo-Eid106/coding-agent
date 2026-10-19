@@ -9,10 +9,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   AgentEventEnum,
   ToolCallEvent,
-} from '../interfaces/agent-stream-event.js';
-import { AppEvent } from '../../events/enums/app-events.enum.js';
+} from '../../interfaces/agent-stream-event.js';
+import { AppEvent } from '../../../events/enums/app-events.enum.js';
 import { ToolFinishedData, ToolStartedData } from '@langchain/protocol';
-import { ToolCall } from '../../../database/entities/tool-call.entity.js';
+import { ToolCall } from '../../../../database/entities/tool-call.entity.js';
 
 type ToolProjection = StreamChannel<ToolStartedData | ToolFinishedData>;
 
@@ -43,7 +43,7 @@ interface ToolProjectionContext {
 }
 
 @Injectable()
-export class ToolProjectionHandler {
+export class ToolsProjectionHandler {
   constructor(
     private readonly em: EntityManager,
     private readonly eventEmitter: EventEmitter2,

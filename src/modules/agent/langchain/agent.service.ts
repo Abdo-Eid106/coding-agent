@@ -10,11 +10,11 @@ import {
 } from './agent-graph.factory.js';
 
 import {
-  ToolProjectionHandler,
+  ToolsProjectionHandler,
   toolEventsTransformer,
-} from './tools-projection-handler.js';
-import { MessagesProjectionHandler } from './messages-projection-handler.js';
-import { StreamCompletionHandler } from './stream-completion-handler.js';
+} from './projections/tools-projection-handler.js';
+import { MessagesProjectionHandler } from './projections/messages-projection-handler.js';
+import { StreamCompletionHandler } from './projections/stream-completion-handler.js';
 import { EntityManager } from '@mikro-orm/core';
 import {
   Message,
@@ -23,15 +23,11 @@ import {
 import { AIModel } from '../../../database/entities/ai-model.entity.js';
 
 interface RunAgentDto {
-  threadId: string;
-  context: AgentGraphContext;
-  message: string;
-  workingDirectory?: string;
+  messageId: string;
 }
 
 interface ResumeAgentDto {
-  threadId: string;
-  context: AgentGraphContext;
+  messageId: string;
   interruptId: string;
   payload: object;
 }
@@ -42,7 +38,7 @@ export class AgentService {
 
   constructor(
     graphFactory: AgentGraphFactory,
-    private readonly toolProjectionHandler: ToolProjectionHandler,
+    private readonly toolsProjectionHandler: ToolsProjectionHandler,
     private readonly messagesProjectionHandler: MessagesProjectionHandler,
     private readonly streamCompletionHandler: StreamCompletionHandler,
     private readonly em: EntityManager,
@@ -50,21 +46,26 @@ export class AgentService {
     this.graph = graphFactory.create();
   }
 
-  async run(dto: RunAgentDto) {
+  async run({ messageId }: RunAgentDto) {
+    const { message, context } = await this.prepareRun(messageId);
+
     const input: GraphInput = {
-      messages: [new HumanMessage(dto.message)],
-      workingDirectory: dto.workingDirectory,
+      messages: [new HumanMessage(message.content)],
+      workingDirectory: message.session.project?.path,
     };
 
-    this.stream(input, dto.threadId, dto.context);
+    await this.stream(input, message.session.id, context);
   }
 
   async resume(dto: ResumeAgentDto) {
+    const { messageId, interruptId, payload } = dto;
+    const { message, context } = await this.prepareRun(messageId);
+
     const input: GraphInput = new Command({
-      resume: { [dto.interruptId]: dto.payload },
+      resume: { [interruptId]: payload },
     });
 
-    this.stream(input, dto.threadId, dto.context);
+    await this.stream(input, message.session.id, context);
   }
 
   private async stream(
@@ -80,7 +81,7 @@ export class AgentService {
     });
 
     await Promise.all([
-      this.toolProjectionHandler.execute(
+      this.toolsProjectionHandler.execute(
         { messageId: context.messageId, sessionId: threadId },
         stream.extensions.tools,
       ),
