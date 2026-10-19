@@ -6,9 +6,7 @@ import {
   StateGraph,
   StateSchema,
   MemorySaver,
-  StreamChannel,
-  ToolsEventData,
-  ProtocolEvent,
+  GraphRunStream,
 } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { Injectable } from '@nestjs/common';
@@ -39,7 +37,6 @@ Keep answers concise and clear. For short answers, a single paragraph is fine.`,
 
 const State = new StateSchema({
   messages: MessagesValue,
-  model: z.string(),
   sessionId: z.string(),
   modelId: z.string(),
   workingDirectory: z.string().optional(),
@@ -116,3 +113,4 @@ export class AgentGraphFactory {
 
 export type AgentGraph = ReturnType<AgentGraphFactory['create']>;
 export type GraphInput = Parameters<AgentGraph['streamEvents']>[0];
+export type GraphStream = GraphRunStream;

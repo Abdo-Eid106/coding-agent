@@ -708,6 +708,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "tool_call_id": {
+          "name": "tool_call_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
         }
       },
       "indexes": [
@@ -730,6 +747,16 @@
           "keyName": "tool_call_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "tool_call_id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "tool_call_tool_call_id_unique",
+          "primary": false,
+          "unique": true
         }
       ],
       "checks": [],
@@ -744,7 +771,8 @@
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.message"
+          "referencedTableName": "public.message",
+          "deleteRule": "cascade"
         }
       },
       "comment": null

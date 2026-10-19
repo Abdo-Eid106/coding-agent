@@ -10,11 +10,17 @@ import {
 } from './agent-graph.factory.js';
 
 import {
-  AgentStreamEvent,
-  AgentEventEnum,
-  ToolCallEvent,
-} from '../interfaces/agent-stream-event.js';
-import { toolEventsTransformer } from './tool-event-transformer.js';
+  ToolProjectionHandler,
+  toolEventsTransformer,
+} from './tools-projection-handler.js';
+import { MessagesProjectionHandler } from './messages-projection-handler.js';
+import { StreamCompletionHandler } from './stream-completion-handler.js';
+import { EntityManager } from '@mikro-orm/core';
+import {
+  Message,
+  MessageRole,
+} from '../../../database/entities/message.entity.js';
+import { AIModel } from '../../../database/entities/ai-model.entity.js';
 
 interface RunAgentDto {
   threadId: string;
@@ -34,32 +40,38 @@ interface ResumeAgentDto {
 export class AgentService {
   private readonly graph: AgentGraph;
 
-  constructor(private readonly graphFactory: AgentGraphFactory) {
+  constructor(
+    graphFactory: AgentGraphFactory,
+    private readonly toolProjectionHandler: ToolProjectionHandler,
+    private readonly messagesProjectionHandler: MessagesProjectionHandler,
+    private readonly streamCompletionHandler: StreamCompletionHandler,
+    private readonly em: EntityManager,
+  ) {
     this.graph = graphFactory.create();
   }
 
-  async *run(dto: RunAgentDto): AsyncGenerator<AgentStreamEvent> {
+  async run(dto: RunAgentDto) {
     const input: GraphInput = {
       messages: [new HumanMessage(dto.message)],
       workingDirectory: dto.workingDirectory,
     };
 
-    yield* this.stream(input, dto.threadId, dto.context);
+    this.stream(input, dto.threadId, dto.context);
   }
 
-  async *resume(dto: ResumeAgentDto): AsyncGenerator<AgentStreamEvent> {
+  async resume(dto: ResumeAgentDto) {
     const input: GraphInput = new Command({
       resume: { [dto.interruptId]: dto.payload },
     });
 
-    yield* this.stream(input, dto.threadId, dto.context);
+    this.stream(input, dto.threadId, dto.context);
   }
 
-  private async *stream(
+  private async stream(
     input: GraphInput,
     threadId: string,
     context: AgentGraphContext,
-  ): AsyncGenerator<AgentStreamEvent> {
+  ) {
     const stream = await this.graph.streamEvents(input, {
       configurable: { thread_id: threadId },
       context,
@@ -67,47 +79,68 @@ export class AgentService {
       transformers: [toolEventsTransformer],
     });
 
-    for await (const event of stream.extensions.tools) {
-      yield {
-        type: event.event as AgentEventEnum,
-        sessionId: threadId,
+    await Promise.all([
+      this.toolProjectionHandler.execute(
+        { messageId: context.messageId, sessionId: threadId },
+        stream.extensions.tools,
+      ),
+      this.messagesProjectionHandler.execute(
+        { messageId: context.messageId, sessionId: threadId },
+        stream.messages,
+      ),
+    ]);
+
+    await this.streamCompletionHandler.execute(
+      {
         messageId: context.messageId,
-        payload: {
-          id: event.tool_call_id,
-          name: event.tool_name,
-          input: event.input,
-          output: event?.output?.lc_kwargs?.content,
+        sessionId: threadId,
+      },
+      stream,
+    );
+  }
+
+  private async prepareRun(messageId: string) {
+    const message = await this.em.findOne(
+      Message,
+      { id: messageId },
+      { populate: ['session', 'session.project'] },
+    );
+
+    if (!message) {
+      throw new Error(`Message ${messageId} was not found`);
+    }
+
+    if (message.role !== MessageRole.USER) {
+      throw new Error(`Message ${messageId} is not a user message`);
+    }
+
+    const model = await this.em.findOne(
+      AIModel,
+      { id: message.modelId },
+      { populate: ['provider'] },
+    );
+
+    if (!model) {
+      throw new Error(`AI model ${message.modelId} was not found`);
+    }
+
+    const provider = model.provider;
+
+    if (!provider.apiKey) {
+      throw new Error(`Provider ${provider.name} has no configured API key`);
+    }
+
+    return {
+      message,
+      context: {
+        modelConfig: {
+          provider: provider.name,
+          model: model.name,
+          apiKey: provider.apiKey,
+          baseUrl: provider.baseUrl ?? '',
         },
-      };
-    }
-
-    for await (const message of stream.messages) {
-      for await (const token of message.text) {
-        yield {
-          type: AgentEventEnum.TOKEN,
-          sessionId: threadId,
-          messageId: context.messageId,
-          payload: token,
-        };
-      }
-    }
-
-    if (stream.interrupted) {
-      yield {
-        type: AgentEventEnum.INTERRUPT,
-        sessionId: threadId,
-        messageId: context.messageId,
-        payload: stream.interrupts[0],
-      };
-
-      return;
-    }
-
-    yield {
-      type: AgentEventEnum.DONE,
-      sessionId: threadId,
-      messageId: context.messageId,
-      payload: null,
+        messageId: message.id,
+      },
     };
   }
 }

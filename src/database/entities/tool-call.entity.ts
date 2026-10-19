@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryKey,
   Property,
+  Unique,
 } from '@mikro-orm/decorators/legacy';
 import { Message } from './message.entity.js';
 import { randomUUID } from 'node:crypto';
@@ -14,22 +15,26 @@ export class ToolCall {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  @Unique()
+  @Property({ type: 'varchar' })
+  toolCallId: string;
+
   @Property({ type: 'varchar' })
   name: string;
 
   @Property({ type: 'json' })
-  input: Record<string, unknown> = {};
+  input: unknown & Opt = {};
 
   @Property({ type: 'json', nullable: true })
-  output?: Record<string, unknown> & Opt;
+  output?: unknown & Opt;
 
   @Property({ type: 'datetime' })
-  startedAt: Date = new Date();
+  startedAt: Date & Opt = new Date();
 
   @Property({ type: 'datetime', nullable: true })
-  finishedAt?: Date;
+  finishedAt?: Date & Opt;
 
   @Index()
-  @ManyToOne(() => Message)
+  @ManyToOne(() => Message, { deleteRule: 'cascade' })
   message: Rel<Message>;
 }

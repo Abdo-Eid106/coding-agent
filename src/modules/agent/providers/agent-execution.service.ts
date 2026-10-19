@@ -8,9 +8,14 @@ import {
 } from '../../../database/entities/message.entity.js';
 import { AIModel } from '../../../database/entities/ai-model.entity.js';
 import { AppEvent } from '../../events/enums/app-events.enum.js';
-import { AgentEventEnum } from '../interfaces/agent-stream-event.js';
+import {
+  AgentEventEnum,
+  TokenEvent,
+  ToolCallEvent,
+} from '../interfaces/agent-stream-event.js';
 import type { AgentGraphContext } from '../langchain/agent-graph.factory.js';
 import { AgentService } from '../langchain/agent.service.js';
+import { ToolCall } from '../../../database/entities/tool-call.entity.js';
 
 export interface PreparedAgentRun {
   message: Message;
@@ -50,13 +55,34 @@ export class AgentExecutionService {
       });
 
       for await (const event of stream) {
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
-          ...event,
-          replyId: reply.id,
-        });
-
         if (event.type === AgentEventEnum.TOKEN) {
-          reply.content += event.payload;
+          reply.content += (event as TokenEvent).payload.token;
+          this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
+            ...event,
+            payload: {
+              ...(event as TokenEvent).payload,
+              replyId: reply.id,
+            },
+          } as TokenEvent);
+        } else if (event.type == AgentEventEnum.TOOL_START) {
+          const { payload } = event as ToolCallEvent;
+          this.em.create(ToolCall, {
+            toolCallId: payload.toolCallId,
+            input: payload.input!,
+            name: payload.name,
+            message,
+          });
+          this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+        } else if (event.type == AgentEventEnum.TOOL_END) {
+          const { payload } = event as ToolCallEvent;
+
+          const toolCall = (await this.em.findOne(ToolCall, {
+            toolCallId: payload.toolCallId,
+          }))!;
+          toolCall.output = payload.output;
+          toolCall.finishedAt = new Date();
+
+          this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
         }
       }
     } catch (error) {
@@ -79,13 +105,27 @@ export class AgentExecutionService {
       });
 
       for await (const event of stream) {
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
-          ...event,
-          replyId: reply.id,
-        });
-
         if (event.type === AgentEventEnum.TOKEN) {
           reply.content += event.payload;
+          this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, {
+            ...event,
+            payload: {
+              ...(event as TokenEvent).payload,
+              replyId: reply.id,
+            },
+          } as TokenEvent);
+        } else if (
+          event.type == AgentEventEnum.TOOL_START ||
+          event.type == AgentEventEnum.TOOL_END
+        ) {
+          const { payload } = event as ToolCallEvent;
+          this.em.create(ToolCall, {
+            toolCallId: payload.toolCallId,
+            input: payload.input!,
+            name: payload.name,
+            message,
+          });
+          this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
         }
       }
     } catch (error) {

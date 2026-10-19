@@ -10,15 +10,22 @@ export interface AgentStreamEvent {
   type: AgentEventEnum;
   sessionId: string;
   messageId: string;
-  replyId?: string;
   payload: unknown;
 }
 
 export interface ToolCallEvent extends AgentStreamEvent {
   payload: {
-    id: string;
+    id?: string;
+    toolCallId: string;
     name: string;
     input?: object;
     output?: object;
+  };
+}
+
+export interface TokenEvent extends AgentStreamEvent {
+  payload: {
+    replyId: string;
+    token: string;
   };
 }
