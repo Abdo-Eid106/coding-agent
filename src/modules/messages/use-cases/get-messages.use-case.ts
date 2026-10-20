@@ -23,7 +23,10 @@ export class GetMessages {
     const rows = await this.em.find(Message, where, {
       orderBy: { id: 'desc' },
       limit: limit + 1,
-      populate: ['replies'],
+      populate: ['replies', 'toolCalls'],
+      populateOrderBy: {
+        toolCalls: { startedAt: 'ASC' },
+      },
     });
 
     const hasMore = rows.length > limit;
