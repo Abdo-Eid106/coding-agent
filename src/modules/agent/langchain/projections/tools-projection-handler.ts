@@ -89,7 +89,7 @@ export class ToolsProjectionHandler {
             type: AgentEventEnum.TOOL_START,
             sessionId: ctx.sessionId,
             messageId: ctx.messageId,
-            payload: { ...base, input: JSON.parse(data.input) },
+            payload: { ...base, input: this.parseIfJson(data.input) },
           }
         : {
             type: AgentEventEnum.TOOL_END,
@@ -97,11 +97,21 @@ export class ToolsProjectionHandler {
             messageId: ctx.messageId,
             payload: {
               ...base,
-              output: JSON.parse(data.output?.lc_kwargs?.content),
+              output: this.parseIfJson(data.output?.lc_kwargs?.content),
             },
           };
 
     return event;
+  }
+
+  private parseIfJson(value: unknown) {
+    if (typeof value !== 'string') return value;
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
   }
 
   private async withErrorHandling(
@@ -110,6 +120,7 @@ export class ToolsProjectionHandler {
     try {
       await operation();
     } catch (error: unknown) {
+      console.log('error = ', error);
       this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
         error:
           error instanceof Error
