@@ -89,13 +89,16 @@ export class ToolsProjectionHandler {
             type: AgentEventEnum.TOOL_START,
             sessionId: ctx.sessionId,
             messageId: ctx.messageId,
-            payload: { ...base, input: data.input },
+            payload: { ...base, input: JSON.parse(data.input) },
           }
         : {
             type: AgentEventEnum.TOOL_END,
             sessionId: ctx.sessionId,
             messageId: ctx.messageId,
-            payload: { ...base, output: data.output?.lc_kwargs?.content },
+            payload: {
+              ...base,
+              output: JSON.parse(data.output?.lc_kwargs?.content),
+            },
           };
 
     return event;
