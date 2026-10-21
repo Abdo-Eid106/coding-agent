@@ -9,10 +9,6 @@ async function bootstrap() {
     cors: true,
   });
 
-  app.enableCors({
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-  });
-
   // Serve static files from the 'public' directory
   app.useStaticAssets(join(import.meta.dirname, '..', 'public'), {
     prefix: '/public/', // optional: configure virtual path prefix
