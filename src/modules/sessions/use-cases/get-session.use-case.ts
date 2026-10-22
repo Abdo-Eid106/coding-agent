@@ -7,7 +7,11 @@ export class GetSession {
   constructor(private readonly em: EntityManager) {}
 
   async execute(id: string) {
-    const session = await this.em.findOne(Session, { id });
+    const session = await this.em.findOne(
+      Session,
+      { id },
+      { populate: ['project'] },
+    );
 
     if (!session) {
       throw new NotFoundException('session not found');

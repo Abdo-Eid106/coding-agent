@@ -3,20 +3,20 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
-} from "@mikro-orm/decorators/legacy";
-import { randomUUID } from "node:crypto";
-import { Session } from "./session.entity.js";
-import { Collection } from "@mikro-orm/core";
+} from '@mikro-orm/decorators/legacy';
+import { randomUUID } from 'node:crypto';
+import { Session } from './session.entity.js';
+import { Collection } from '@mikro-orm/core';
 
 @Entity()
 export class Project {
-  @PrimaryKey({ type: "uuid" })
+  @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ type: "varchar" })
+  @Property({ type: 'varchar' })
   name: string;
 
-  @Property({ type: "varchar" })
+  @Property({ type: 'varchar' })
   path: string;
 
   @OneToMany(() => Session, (session) => session.project)

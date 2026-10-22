@@ -11,6 +11,7 @@ import { CreateSessionDto } from './dto/create-session.dto.js';
 import { DeleteSession } from './use-cases/delete-session.use-case.js';
 import { CreateSession } from './use-cases/create-session.use-case.js';
 import { GetSession } from './use-cases/get-session.use-case.js';
+import { GetSessions } from './use-cases/get-sessions.use-case.js';
 
 @Controller('sessions')
 export class SessionController {
@@ -18,11 +19,17 @@ export class SessionController {
     private readonly createSession: CreateSession,
     private readonly deleteSession: DeleteSession,
     private readonly getSession: GetSession,
+    private readonly getSessions: GetSessions,
   ) {}
 
   @Post()
   create(@Body() dto: CreateSessionDto) {
     return this.createSession.execute(dto);
+  }
+
+  @Get()
+  getAll() {
+    return this.getSessions.execute();
   }
 
   @Get(':id')
