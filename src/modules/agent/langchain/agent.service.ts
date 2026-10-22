@@ -75,6 +75,7 @@ export class AgentService {
   ) {
     const stream = await this.graph.streamEvents(input, {
       configurable: { thread_id: threadId },
+      recursionLimit: 100,
       context,
       version: 'v3',
       transformers: [toolEventsTransformer],
