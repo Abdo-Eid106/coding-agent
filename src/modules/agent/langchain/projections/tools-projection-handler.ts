@@ -74,10 +74,10 @@ export class ToolsProjectionHandler {
           event.payload.id = toolCall.id;
           toolCall.finishedAt = new Date();
         }
+        await this.em.flush();
 
         this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
       }
-      await this.em.flush();
     });
   }
 
@@ -93,7 +93,11 @@ export class ToolsProjectionHandler {
             type: AgentEventEnum.TOOL_START,
             sessionId: ctx.sessionId,
             messageId: ctx.messageId,
-            payload: { ...base, input: this.parseIfJson(data.input) },
+            payload: {
+              ...base,
+              input: this.parseIfJson(data.input),
+              startedAt: new Date(),
+            },
           }
         : {
             type: AgentEventEnum.TOOL_END,
@@ -102,6 +106,7 @@ export class ToolsProjectionHandler {
             payload: {
               ...base,
               output: this.parseIfJson(data.output?.lc_kwargs?.content),
+              finishedAt: new Date(),
             },
           };
 
