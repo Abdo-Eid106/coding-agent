@@ -20,6 +20,8 @@ export interface ToolCallEvent extends AgentStreamEvent {
     name: string;
     input?: object;
     output?: object;
+    startedAt?: Date;
+    finishedAt?: Date;
   };
 }
 
