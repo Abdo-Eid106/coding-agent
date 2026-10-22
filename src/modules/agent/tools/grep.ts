@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { spawn } from 'node:child_process';
 import * as rg from '@vscode/ripgrep';
 import path from 'node:path';
@@ -12,25 +13,27 @@ interface GrepOptions {
   globs?: string[] | undefined;
 }
 
-export function grep({
-  pattern,
-  directory,
-  isRegex = false,
-  ignoreCase = false,
-  globs = [],
-}: GrepOptions): Promise<string> {
+export function grep(
+  {
+    pattern,
+    directory,
+    isRegex = false,
+    ignoreCase = false,
+    globs = [],
+  }: GrepOptions,
+  signal?: AbortSignal,
+): Promise<string> {
   const args: string[] = ['--line-number', '--json'];
   if (!isRegex) args.push('--fixed-strings');
   if (ignoreCase) args.push('-i');
   globs.forEach((glob) => args.push('-g', glob));
 
   return new Promise((resolve, reject) => {
-    const child = spawn(rg.rgPath, [
-      ...args,
-      '--',
-      pattern,
-      path.resolve(directory),
-    ]);
+    const child = spawn(
+      rg.rgPath,
+      [...args, '--', pattern, path.resolve(directory)],
+      { signal },
+    );
 
     let output = '';
     child.stdout.setEncoding('utf8');
@@ -50,8 +53,8 @@ export function grep({
 }
 
 export const grepTool = tool(
-  async (input) => {
-    const content = await grep(input);
+  async (input, config?: RunnableConfig) => {
+    const content = await grep(input, config?.signal);
     return { content };
   },
   {

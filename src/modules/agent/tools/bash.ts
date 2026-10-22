@@ -1,15 +1,15 @@
-import { tool } from "@langchain/core/tools";
+import { tool } from '@langchain/core/tools';
 import {
   END,
   interrupt,
   START,
   StateGraph,
   StateSchema,
-} from "@langchain/langgraph";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-import z from "zod";
-import { classifyCommand, CommandDecision } from "./classify-command.js";
+} from '@langchain/langgraph';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
+import z from 'zod';
+import { classifyCommand, CommandDecision } from './classify-command.js';
 
 const execAsync = promisify(exec);
 
@@ -61,22 +61,22 @@ export async function bash({
     };
 
     return {
-      stdout: (err.stdout ?? "").slice(-maxOutputLength),
-      stderr: (err.stderr ?? "").slice(-maxOutputLength),
-      exitCode: typeof err.code === "number" ? err.code : 1,
+      stdout: (err.stdout ?? '').slice(-maxOutputLength),
+      stderr: (err.stderr ?? '').slice(-maxOutputLength),
+      exitCode: typeof err.code === 'number' ? err.code : 1,
     };
   }
 }
 
 const AVAILABLE_OPTIONS = [
   {
-    id: "opt_approve",
-    label: "Approve and execute command",
+    id: 'opt_approve',
+    label: 'Approve and execute command',
     decision: CommandDecision.ALLOW,
   },
   {
-    id: "opt_reject",
-    label: "Reject command",
+    id: 'opt_reject',
+    label: 'Reject command',
     decision: CommandDecision.DENY,
   },
 ] as const;
@@ -99,7 +99,7 @@ const BashState = new StateSchema({
 });
 
 export const bashGraph = new StateGraph(BashState)
-  .addNode("classify", async (state) => {
+  .addNode('classify', async (state) => {
     const decision = classifyCommand(state.command);
     if (decision !== CommandDecision.ASK) {
       return { status: decision };
@@ -115,7 +115,7 @@ export const bashGraph = new StateGraph(BashState)
     );
     if (!matchedOption) {
       throw new Error(
-        `Invalid option ID received: "${response?.selectedId}". Allowed IDs: ${AVAILABLE_OPTIONS.map((o) => o.id).join(", ")}`,
+        `Invalid option ID received: "${response?.selectedId}". Allowed IDs: ${AVAILABLE_OPTIONS.map((o) => o.id).join(', ')}`,
       );
     }
 
@@ -123,7 +123,7 @@ export const bashGraph = new StateGraph(BashState)
       status: matchedOption.decision,
     };
   })
-  .addNode("execute", async (state) => {
+  .addNode('execute', async (state) => {
     const result = await bash({
       command: state.command,
       cwd: state.cwd,
@@ -135,16 +135,16 @@ export const bashGraph = new StateGraph(BashState)
 
     return { result };
   })
-  .addEdge(START, "classify")
+  .addEdge(START, 'classify')
   .addConditionalEdges(
-    "classify",
-    (state) => (state.status === CommandDecision.ALLOW ? "execute" : END),
+    'classify',
+    (state) => (state.status === CommandDecision.ALLOW ? 'execute' : END),
     {
-      execute: "execute",
+      execute: 'execute',
       [END]: END,
     },
   )
-  .addEdge("execute", END)
+  .addEdge('execute', END)
   .compile();
 
 export const bashTool = tool(
@@ -153,7 +153,7 @@ export const bashTool = tool(
 
     if (state.status === CommandDecision.DENY) {
       return JSON.stringify({
-        stdout: "",
+        stdout: '',
         stderr: `Command execution denied: "${input.command}"`,
         exitCode: 1,
       });
@@ -162,23 +162,23 @@ export const bashTool = tool(
     return JSON.stringify(state.result);
   },
   {
-    name: "bash",
+    name: 'bash',
     description:
-      "Executes a shell command in a specified directory and returns stdout, stderr, and exitCode.",
+      'Executes a shell command in a specified directory and returns stdout, stderr, and exitCode.',
     schema: z.object({
-      command: z.string().describe("The shell command to execute."),
-      cwd: z.string().describe("The working directory to run the command in."),
+      command: z.string().describe('The shell command to execute.'),
+      cwd: z.string().describe('The working directory to run the command in.'),
       timeout: z
         .number()
         .optional()
         .describe(
-          "Maximum execution time in milliseconds (defaults to 30000).",
+          'Maximum execution time in milliseconds (defaults to 30000).',
         ),
       maxOutputLength: z
         .number()
         .optional()
         .describe(
-          "Maximum character length for stdout/stderr (defaults to 10000).",
+          'Maximum character length for stdout/stderr (defaults to 10000).',
         ),
       shell: z
         .string()
@@ -189,7 +189,7 @@ export const bashTool = tool(
       env: z
         .record(z.string(), z.string())
         .optional()
-        .describe("Additional environment variables to pass to the process."),
+        .describe('Additional environment variables to pass to the process.'),
     }),
   },
 );

@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import z from 'zod';
@@ -9,14 +10,18 @@ interface WriteOptions {
   overwrite?: boolean | undefined;
 }
 
-export async function write({
-  filePath,
-  content,
-  overwrite = true,
-}: WriteOptions): Promise<void> {
+export async function write(
+  { filePath, content, overwrite = true }: WriteOptions,
+  signal?: AbortSignal,
+): Promise<void> {
+  signal?.throwIfAborted();
   const absolutePath = path.resolve(filePath);
 
   await mkdir(path.dirname(absolutePath), { recursive: true });
+
+  // Last chance to abort. The write itself is not given the signal on purpose,
+  // so an abort can't leave a truncated file.
+  signal?.throwIfAborted();
   await writeFile(absolutePath, content, {
     encoding: 'utf8',
     flag: overwrite ? 'w' : 'wx',
@@ -24,8 +29,8 @@ export async function write({
 }
 
 export const writeTool = tool(
-  async (input) => {
-    await write(input);
+  async (input, config?: RunnableConfig) => {
+    await write(input, config?.signal);
     return { content: `Successfully wrote to file: ${input.filePath}` };
   },
   {

@@ -6,8 +6,10 @@ import { AgentGraphFactory } from './langchain/agent-graph.factory.js';
 import { MessagesProjectionHandler } from './langchain/projections/messages-projection-handler.js';
 import { ToolsProjectionHandler } from './langchain/projections/tools-projection-handler.js';
 import { StreamCompletionHandler } from './langchain/projections/stream-completion-handler.js';
+import { SessionModule } from '../sessions/sessions.module.js';
 
 @Module({
+  imports: [SessionModule],
   providers: [
     ToolManager,
     AgentService,

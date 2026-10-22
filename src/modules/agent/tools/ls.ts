@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import z from 'zod';
@@ -13,15 +14,19 @@ export interface LsOptions {
   ignore?: string[] | undefined;
 }
 
-export async function ls({
-  directory,
-  all = false,
-  sort = true,
-  limit = 100,
-  recursive = false,
-  maxDepth = 2,
-  ignore = [],
-}: LsOptions) {
+export async function ls(
+  {
+    directory,
+    all = false,
+    sort = true,
+    limit = 100,
+    recursive = false,
+    maxDepth = 2,
+    ignore = [],
+  }: LsOptions,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted();
   const absolutePath = path.resolve(directory);
   const info = await stat(absolutePath);
 
@@ -37,6 +42,7 @@ export async function ls({
   }[] = [];
 
   async function walk(currentPath: string, depth: number) {
+    signal?.throwIfAborted();
     const entries = await readdir(currentPath, { withFileTypes: true });
     const filtered = entries.filter(
       (entry) =>
@@ -79,8 +85,8 @@ export async function ls({
 }
 
 export const lsTool = tool(
-  async (input) => {
-    return await ls(input);
+  async (input, config?: RunnableConfig) => {
+    return await ls(input, config?.signal);
   },
   {
     name: 'ls',

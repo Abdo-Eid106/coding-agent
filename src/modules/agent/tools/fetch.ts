@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import TurndownService from 'turndown';
 import * as cheerio from 'cheerio';
 import z from 'zod';
@@ -18,12 +19,18 @@ function textToMarkdown(text: string) {
 export interface FetchOptions {
   timeout?: number | undefined;
   format?: 'text' | 'markdown' | undefined;
+  signal?: AbortSignal | undefined;
 }
 
 export async function fetchUrl(url: string, options: FetchOptions) {
-  const { timeout = 5000, format = 'text' } = options;
+  const { timeout = 5000, format = 'text', signal } = options;
 
-  const res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
+  const timeoutSignal = AbortSignal.timeout(timeout);
+  const combined = signal
+    ? AbortSignal.any([signal, timeoutSignal])
+    : timeoutSignal;
+
+  const res = await fetch(url, { signal: combined });
   if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
 
   const text = await res.text();
@@ -32,8 +39,12 @@ export async function fetchUrl(url: string, options: FetchOptions) {
 }
 
 export const fetchTool = tool(
-  async ({ url, timeout, format }) => {
-    const content = await fetchUrl(url, { timeout, format });
+  async ({ url, timeout, format }, config?: RunnableConfig) => {
+    const content = await fetchUrl(url, {
+      timeout,
+      format,
+      signal: config?.signal,
+    });
     return { content };
   },
   {

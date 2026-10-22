@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import z from 'zod';
@@ -9,11 +10,11 @@ interface viewOptions {
   endLine?: number | undefined;
 }
 
-export async function view({
-  filePath,
-  startLine,
-  endLine,
-}: viewOptions): Promise<string> {
+export async function view(
+  { filePath, startLine, endLine }: viewOptions,
+  signal?: AbortSignal,
+): Promise<string> {
+  signal?.throwIfAborted();
   const absolutePath = path.resolve(filePath);
 
   const info = await stat(absolutePath);
@@ -21,7 +22,7 @@ export async function view({
     throw new Error('Invalid file path');
   }
 
-  const content = await readFile(absolutePath, 'utf8');
+  const content = await readFile(absolutePath, { encoding: 'utf8', signal });
   const lines = content.split('\n');
 
   const start = startLine ?? 1;
@@ -34,8 +35,8 @@ export async function view({
 }
 
 export const viewTool = tool(
-  async (input) => {
-    const content = await view(input);
+  async (input, config?: RunnableConfig) => {
+    const content = await view(input, config?.signal);
     return { content };
   },
   {

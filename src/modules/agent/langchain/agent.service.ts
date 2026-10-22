@@ -21,6 +21,7 @@ import {
   MessageRole,
 } from '../../../database/entities/message.entity.js';
 import { AIModel } from '../../../database/entities/ai-model.entity.js';
+import { SessionManager } from '../../sessions/session.manager.js';
 
 interface RunAgentDto {
   messageId: string;
@@ -41,6 +42,7 @@ export class AgentService {
     private readonly toolsProjectionHandler: ToolsProjectionHandler,
     private readonly messagesProjectionHandler: MessagesProjectionHandler,
     private readonly streamCompletionHandler: StreamCompletionHandler,
+    private readonly sessionManager: SessionManager,
     private readonly em: EntityManager,
   ) {
     this.graph = graphFactory.create();
@@ -73,32 +75,40 @@ export class AgentService {
     threadId: string,
     context: AgentGraphContext,
   ) {
-    const stream = await this.graph.streamEvents(input, {
-      configurable: { thread_id: threadId },
-      recursionLimit: 100,
-      context,
-      version: 'v3',
-      transformers: [toolEventsTransformer],
-    });
+    const controller = this.sessionManager.addSession(threadId);
 
-    await Promise.all([
-      this.toolsProjectionHandler.execute(
-        { messageId: context.messageId, sessionId: threadId },
-        stream.extensions.tools,
-      ),
-      this.messagesProjectionHandler.execute(
-        { messageId: context.messageId, sessionId: threadId },
-        stream.messages,
-      ),
-    ]);
+    try {
+      const stream = await this.graph.streamEvents(input, {
+        configurable: { thread_id: threadId },
+        recursionLimit: 100,
+        context,
+        version: 'v3',
+        transformers: [toolEventsTransformer],
+        signal: controller.signal,
+      });
 
-    await this.streamCompletionHandler.execute(
-      {
-        messageId: context.messageId,
-        sessionId: threadId,
-      },
-      stream,
-    );
+      await Promise.all([
+        this.toolsProjectionHandler.execute(
+          { messageId: context.messageId, sessionId: threadId },
+          stream.extensions.tools,
+        ),
+        this.messagesProjectionHandler.execute(
+          { messageId: context.messageId, sessionId: threadId },
+          stream.messages,
+        ),
+      ]);
+
+      await this.streamCompletionHandler.execute(
+        {
+          messageId: context.messageId,
+          sessionId: threadId,
+        },
+        stream,
+      );
+    } catch {
+    } finally {
+      this.sessionManager.removeSession(threadId);
+    }
   }
 
   private async prepareRun(messageId: string) {

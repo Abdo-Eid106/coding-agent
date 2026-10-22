@@ -5,10 +5,18 @@ import { SessionController } from './sessions.controller.js';
 import { ProvidersModule } from '../providers/providers.module.js';
 import { GetSession } from './use-cases/get-session.use-case.js';
 import { GetSessions } from './use-cases/get-sessions.use-case.js';
+import { SessionManager } from './session.manager.js';
 
 @Module({
   imports: [ProvidersModule],
-  providers: [CreateSession, DeleteSession, GetSession, GetSessions],
+  providers: [
+    CreateSession,
+    DeleteSession,
+    GetSession,
+    GetSessions,
+    SessionManager,
+  ],
   controllers: [SessionController],
+  exports: [SessionManager],
 })
 export class SessionModule {}

@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import fg from 'fast-glob';
 import path from 'node:path';
 import z from 'zod';
@@ -24,14 +25,17 @@ const DEFAULT_IGNORE = [
   '**/build/**',
 ];
 
-export async function glob({
-  directory,
-  pattern,
-  limit = 100,
-  ignore = [],
-  maxDepth = 10,
-}: SearchFilesInput): Promise<SearchFilesResult> {
-  const matches = await fg(pattern, {
+export async function glob(
+  {
+    directory,
+    pattern,
+    limit = 100,
+    ignore = [],
+    maxDepth = 10,
+  }: SearchFilesInput,
+  signal?: AbortSignal,
+): Promise<SearchFilesResult> {
+  const stream = fg.stream(pattern, {
     cwd: path.resolve(directory),
     onlyFiles: true,
     dot: true,
@@ -41,6 +45,13 @@ export async function glob({
     suppressErrors: true,
     unique: true,
   });
+
+  const matches: string[] = [];
+  for await (const entry of stream) {
+    signal?.throwIfAborted();
+    matches.push(entry as string);
+  }
+  signal?.throwIfAborted();
 
   const files = matches.sort().slice(0, limit);
 
@@ -52,8 +63,8 @@ export async function glob({
 }
 
 export const globTool = tool(
-  async (input) => {
-    return await glob(input);
+  async (input, config?: RunnableConfig) => {
+    return await glob(input, config?.signal);
   },
   {
     name: 'glob',
