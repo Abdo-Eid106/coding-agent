@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { AppEvent } from './enums/app-events.enum.js';
 import { AgentStreamEvent } from '../agent/interfaces/agent-stream-event.js';
+import { SessionStatus } from '../sessions/enum/session.status.js';
 
 @Controller('events')
 export class EventsController {
@@ -29,12 +30,30 @@ export class EventsController {
         });
       };
 
+      const onSessionStatusChanged = (event: {
+        sessionId: string;
+        status: SessionStatus;
+      }) => {
+        subscriber.next({
+          type: 'session_status',
+          data: event,
+        });
+      };
+
       this.eventEmitter.on(AppEvent.AGENT_STREAM_EVENT, onAgentEvent);
       this.eventEmitter.on(AppEvent.AGENT_STREAM_ERROR, onAgentError);
+      this.eventEmitter.on(
+        AppEvent.AGENT_SESSION_STATUS_CHANGED,
+        onSessionStatusChanged,
+      );
 
       return () => {
         this.eventEmitter.off(AppEvent.AGENT_STREAM_EVENT, onAgentEvent);
         this.eventEmitter.off(AppEvent.AGENT_STREAM_ERROR, onAgentError);
+        this.eventEmitter.off(
+          AppEvent.AGENT_SESSION_STATUS_CHANGED,
+          onSessionStatusChanged,
+        );
       };
     });
   }
