@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -37,6 +39,12 @@ export class SessionController {
   @Get()
   getAll() {
     return this.getSessions.execute();
+  }
+
+  @Post(':id/stop')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  stopSession(@Param('id', ParseUUIDPipe) id: string) {
+    this.sessionManager.removeSession(id);
   }
 
   @Get(':id')
