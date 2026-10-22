@@ -56,7 +56,6 @@ export class ToolsProjectionHandler {
     return this.withErrorHandling(async () => {
       for await (const data of projection) {
         const event = this.constructEvent(ctx, data);
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
 
         if (event.type == AgentEventEnum.TOOL_START) {
           const toolCall = this.em.create(ToolCall, {
@@ -65,13 +64,17 @@ export class ToolsProjectionHandler {
             input: event.payload.input,
             message: event.messageId,
           });
+          event.payload.id = toolCall.id;
         } else {
           const toolCall = await this.em.findOne(ToolCall, {
             toolCallId: event.payload.toolCallId,
           });
           if (!toolCall) return;
           toolCall.output = event.payload.output;
+          event.payload.id = toolCall.id;
         }
+
+        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
       }
       await this.em.flush();
     });
@@ -105,10 +108,8 @@ export class ToolsProjectionHandler {
   }
 
   private parseIfJson(value: unknown) {
-    if (typeof value !== 'string') return value;
-
     try {
-      return JSON.parse(value);
+      return JSON.parse(value as any);
     } catch {
       return value;
     }
