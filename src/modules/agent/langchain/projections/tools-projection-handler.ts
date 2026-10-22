@@ -72,6 +72,7 @@ export class ToolsProjectionHandler {
           if (!toolCall) return;
           toolCall.output = event.payload.output;
           event.payload.id = toolCall.id;
+          toolCall.finishedAt = new Date();
         }
 
         this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
