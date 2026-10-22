@@ -40,6 +40,8 @@ export class StreamCompletionHandler {
     try {
       await operation();
     } catch (error: unknown) {
+      if (this.isAbortError(error)) return;
+
       this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
         error:
           error instanceof Error
@@ -47,5 +49,12 @@ export class StreamCompletionHandler {
             : 'An unexpected error occurred',
       });
     }
+  }
+
+  private isAbortError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      (error.name === 'AbortError' || error.name === 'APIUserAbortError')
+    );
   }
 }

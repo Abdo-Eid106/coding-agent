@@ -80,11 +80,20 @@ export class MessagesProjectionHandler {
   }
 
   private emitError(ctx: ProjectionContext, error: unknown) {
+    if (this.isAbortError(error)) return;
+
     this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
       sessionId: ctx.sessionId,
       messageId: ctx.messageId,
       error:
         error instanceof Error ? error.message : 'An unexpected error occurred',
     });
+  }
+
+  private isAbortError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      (error.name === 'AbortError' || error.name === 'APIUserAbortError')
+    );
   }
 }

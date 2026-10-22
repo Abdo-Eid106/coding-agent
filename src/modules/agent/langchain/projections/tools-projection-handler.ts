@@ -127,6 +127,8 @@ export class ToolsProjectionHandler {
     try {
       await operation();
     } catch (error: unknown) {
+      if (this.isAbortError(error)) return;
+
       console.log('error = ', error);
       this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
         error:
@@ -135,5 +137,12 @@ export class ToolsProjectionHandler {
             : 'An unexpected error occurred',
       });
     }
+  }
+
+  private isAbortError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      (error.name === 'AbortError' || error.name === 'APIUserAbortError')
+    );
   }
 }
