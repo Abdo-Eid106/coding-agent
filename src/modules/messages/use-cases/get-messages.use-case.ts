@@ -1,5 +1,4 @@
 import { EntityManager } from '@mikro-orm/core';
-import type { FilterQuery } from '@mikro-orm/core';
 import { Message } from '../../../database/entities/message.entity.js';
 import { Injectable } from '@nestjs/common';
 
@@ -15,7 +14,7 @@ export class GetMessages {
         session: { id: sessionId },
       },
       {
-        orderBy: { id: 'desc' },
+        orderBy: { id: 'asc' },
         populate: ['replies', 'toolCalls'],
         populateOrderBy: {
           toolCalls: { startedAt: 'ASC' },
