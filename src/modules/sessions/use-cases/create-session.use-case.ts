@@ -1,16 +1,18 @@
 import { EntityManager } from '@mikro-orm/core';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+
 import { Session } from '../../../database/entities/session.entity.js';
 import { Project } from '../../../database/entities/project.entity.js';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSessionDto } from '../dto/create-session.dto.js';
-import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
-import { createModel } from '../../agent/langchain/create-model.js';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
   Message,
   MessageRole,
 } from '../../../database/entities/message.entity.js';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { CreateSessionDto } from '../dto/create-session.dto.js';
+import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
+import { createModel } from '../../agent/langchain/create-model.js';
 import { AppEvent } from '../../events/enums/app-events.enum.js';
 
 const TITLE_SYSTEM_PROMPT =
@@ -19,6 +21,8 @@ const TITLE_SYSTEM_PROMPT =
 
 @Injectable()
 export class CreateSession {
+  private readonly logger = new Logger(CreateSession.name);
+
   constructor(
     private readonly em: EntityManager,
     private readonly getModel: GetModel,
@@ -27,17 +31,19 @@ export class CreateSession {
 
   async execute(dto: CreateSessionDto) {
     const { projectId, messageId, messageContent, modelId } = dto;
-
     const project = projectId ? await this.findProject(projectId) : null;
-    const title = await this.generateTitle(modelId, messageContent);
 
-    const session = this.em.create(Session, { title, project });
+    const session = this.em.create(Session, {
+      title: this.createFallbackTitle(messageContent),
+      project,
+    });
+
     const message = this.em.create(Message, {
       session,
       id: messageId,
       content: messageContent,
       role: MessageRole.USER,
-      modelId: dto.modelId,
+      modelId,
     });
 
     await this.em.flush();
@@ -46,17 +52,34 @@ export class CreateSession {
       messageId: message.id,
     });
 
+    void this.generateAndUpdateTitle(session.id, modelId, messageContent);
+
     return session;
   }
 
   private async findProject(projectId: string) {
-    const project = await this.em.findOne(Project, { id: projectId });
-    if (!project) throw new NotFoundException('Project not found');
+    const project = await this.em.findOne(Project, {
+      id: projectId,
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
     return project;
   }
 
-  private async generateTitle(modeId: string, messageContent: string) {
-    const aiModel = await this.getModel.execute(modeId);
+  private createFallbackTitle(content: string) {
+    const title = content.trim().split(/\s+/).slice(0, 6).join(' ');
+    return title.length > 0 ? title : 'New Chat';
+  }
+
+  private async generateAndUpdateTitle(
+    sessionId: string,
+    modelId: string,
+    messageContent: string,
+  ) {
+    const aiModel = await this.getModel.execute(modelId);
     const provider = aiModel.provider;
 
     const model = createModel({
@@ -80,6 +103,13 @@ export class CreateSession {
             .join('')
             .trim();
 
-    return title;
+    const em = this.em.fork();
+    const session = await em.findOne(Session, {
+      id: sessionId,
+    });
+    if (!session) return;
+    session.title = title;
+
+    await em.flush();
   }
 }
