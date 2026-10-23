@@ -5,6 +5,8 @@ import { GetConfiguredProviders } from './use-cases/get-configured-providers.use
 import { GetModel } from './use-cases/get-model.use-case.js';
 import { RemoveApiKey } from './use-cases/remove-api-key.use-case.js';
 import { AddCustomProvider } from './use-cases/add-custom-provider.use-case.js';
+import { GetProviders } from './use-cases/get-providers.js';
+import { DeleteProvider } from './use-cases/delete-provider.use-case.js';
 
 @Module({
   controllers: [ProvidersController],
@@ -13,7 +15,9 @@ import { AddCustomProvider } from './use-cases/add-custom-provider.use-case.js';
     GetConfiguredProviders,
     GetModel,
     RemoveApiKey,
+    GetProviders,
     AddCustomProvider,
+    DeleteProvider,
   ],
   exports: [GetModel],
 })
