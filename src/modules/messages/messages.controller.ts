@@ -5,12 +5,10 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
-  Query,
 } from '@nestjs/common';
 import { GetMessages } from './use-cases/get-messages.use-case.js';
 import { AddMessage } from './use-cases/add-message.use-case.js';
 import { AddMessageDto } from './dto/add-message.dto.js';
-import { GetMessagesDto } from './dto/get-messages.dto.js';
 
 @Controller('sessions/:id/messages')
 export class MessagesController {
@@ -25,7 +23,7 @@ export class MessagesController {
   }
 
   @Get()
-  get(@Param('id', ParseUUIDPipe) id: string, @Query() query: GetMessagesDto) {
-    return this.getMessages.execute(id, query);
+  get(@Param('id', ParseUUIDPipe) sessionId: string) {
+    return this.getMessages.execute(sessionId);
   }
 }
