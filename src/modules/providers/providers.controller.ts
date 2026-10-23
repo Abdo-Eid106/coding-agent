@@ -1,12 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { AddApiKey } from './use-cases/add-api-key.use-case.js';
 import { GetConfiguredProviders } from './use-cases/get-configured-providers.use-case.js';
 import { RemoveApiKey } from './use-cases/remove-api-key.use-case.js';
 import { AddApiKeyDto } from './dto/add-api-key.dto.js';
-import { AddCustomProviderDto } from './dto/add-custom-provider.js';
-import { AddCustomProvider } from './use-cases/add-custom-provider.use-case.js';
+import { AddProviderDto } from './dto/add-provider.dto.js';
+import { AddProvider } from './use-cases/add-provider.use-case.js';
 import { GetProviders } from './use-cases/get-providers.js';
 import { DeleteProvider } from './use-cases/delete-provider.use-case.js';
+import { UpdateProvider } from './use-cases/update-provider.use-case.js';
+import { UpdateProviderDto } from './dto/update-provider.dto.js';
 
 @Controller('providers')
 export class ProvidersController {
@@ -14,9 +26,10 @@ export class ProvidersController {
     private readonly addApiKeyUsecase: AddApiKey,
     private readonly fetConfiguredProviders: GetConfiguredProviders,
     private readonly removeApiKey: RemoveApiKey,
-    private readonly addCustomProvider: AddCustomProvider,
+    private readonly addProvider: AddProvider,
     private readonly getProviders: GetProviders,
     private readonly deleteProviderUseCase: DeleteProvider,
+    private readonly updateProvider: UpdateProvider,
   ) {}
 
   @Get()
@@ -25,8 +38,8 @@ export class ProvidersController {
   }
 
   @Post()
-  create(@Body() dto: AddCustomProviderDto) {
-    return this.addCustomProvider.execute(dto);
+  create(@Body() dto: AddProviderDto) {
+    return this.addProvider.execute(dto);
   }
 
   @Post(':providerId/api-key')
@@ -35,6 +48,15 @@ export class ProvidersController {
     @Body() dto: AddApiKeyDto,
   ) {
     return this.addApiKeyUsecase.execute(providerId, dto);
+  }
+
+  @Put(':providerId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async update(
+    @Param('providerId') id: string,
+    @Body() dto: UpdateProviderDto,
+  ) {
+    await this.updateProvider.execute(id, dto);
   }
 
   @Delete(':providerId/api-key')

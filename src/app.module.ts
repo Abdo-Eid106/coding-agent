@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -11,6 +11,7 @@ import { ProvidersModule } from './modules/providers/providers.module.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventsModule } from './modules/events/events.module.js';
 import { AgentModule } from './modules/agent/agent.module.js';
+import { APP_PIPE } from '@nestjs/core';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,6 +30,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AgentModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_PIPE, useValue: new ValidationPipe({ transform: true }) },
+  ],
 })
 export class AppModule {}

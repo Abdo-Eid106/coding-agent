@@ -1,18 +1,15 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsString, ValidateNested } from 'class-validator';
 
-export class AddCustomModelDto {
+export class AddModelDto {
   @IsString()
-  modelId: string;
+  id: string;
 
   @IsString()
   displayName: string;
 }
 
-export class AddCustomProviderDto {
-  @IsString()
-  providerId: string;
-
+export class UpdateProviderDto {
   @IsString()
   displayName: string;
 
@@ -24,6 +21,6 @@ export class AddCustomProviderDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AddCustomModelDto)
-  models: AddCustomModelDto[];
+  @Type(() => AddModelDto)
+  models: AddModelDto[];
 }

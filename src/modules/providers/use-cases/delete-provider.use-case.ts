@@ -1,11 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Provider } from '../../../database/entities/provider.entity.js';
-import { ProviderEnum } from '../enums/provider.enum.js';
 
 @Injectable()
 export class DeleteProvider {
@@ -20,14 +15,6 @@ export class DeleteProvider {
 
     if (!provider) {
       throw new NotFoundException('Provider not found');
-    }
-
-    if (
-      Object.values(ProviderEnum).some(
-        (value) => value == provider.id.toLowerCase(),
-      )
-    ) {
-      throw new BadRequestException('Cannot delete default built-in providers');
     }
 
     this.em.remove(provider);

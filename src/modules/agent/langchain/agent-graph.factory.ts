@@ -44,9 +44,8 @@ const State = new StateSchema({
 
 export const AgentContext = z.object({
   modelConfig: z.object({
-    provider: z.string(),
     apiKey: z.string(),
-    model: z.string(),
+    modelId: z.string(),
     baseUrl: z.string().default(''),
   }),
   messageId: z.string(),
@@ -63,15 +62,13 @@ export class AgentGraphFactory {
       context: AgentContext,
     })
       .addNode('agent', async (state, runtime) => {
-        const { provider, apiKey, model, baseUrl } =
-          runtime.context!.modelConfig;
+        const { apiKey, modelId, baseUrl } = runtime.context!.modelConfig;
 
         const tools = await this.toolManager.getTools();
 
         const modelWithTools = createModel({
-          provider,
           apiKey,
-          model,
+          modelId,
           baseUrl,
         }).bindTools(tools);
 

@@ -14,7 +14,7 @@ export class AIModel {
   id: string;
 
   @Property({ type: 'varchar' })
-  name: string;
+  displayName: string;
 
   @Property({ nullable: true, type: 'int' })
   contextWindow?: number & Opt;

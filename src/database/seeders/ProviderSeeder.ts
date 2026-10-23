@@ -14,9 +14,9 @@ export class ProviderSeeder extends Seeder {
     const providers = await em.find(Provider, {});
 
     Object.values(ProviderEnum).map(async (value) => {
-      const provider = providers.find((provider) => provider.name == value);
+      const provider = providers.find((provider) => provider.id == value);
       if (provider) return;
-      em.create(Provider, { name: value, id: value });
+      em.create(Provider, { displayName: value, id: value });
     });
 
     const modelId = 'gemini-3.5-flash-lite';
@@ -25,7 +25,11 @@ export class ProviderSeeder extends Seeder {
     });
 
     if (!model) {
-      em.create(AIModel, { id: modelId, name: modelId, provider: 'gemini' });
+      em.create(AIModel, {
+        id: modelId,
+        displayName: modelId,
+        provider: 'gemini',
+      });
     }
 
     await em.flush();

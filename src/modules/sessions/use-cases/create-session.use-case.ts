@@ -83,8 +83,7 @@ export class CreateSession {
     const provider = aiModel.provider;
 
     const model = createModel({
-      model: aiModel.id,
-      provider: provider.name,
+      modelId: aiModel.id,
       apiKey: provider.apiKey!,
       baseUrl: provider.baseUrl,
     });

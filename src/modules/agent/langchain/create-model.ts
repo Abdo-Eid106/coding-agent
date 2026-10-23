@@ -1,41 +1,15 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogle } from '@langchain/google';
 
 type ModelConfig = {
-  provider: string;
-  model: string;
+  modelId: string;
   apiKey: string;
-  baseUrl?: string | undefined;
+  baseUrl?: string;
 };
 
 export function createModel(config: ModelConfig) {
-  switch (config.provider) {
-    case 'openai':
-      return new ChatOpenAI({
-        model: config.model,
-        apiKey: config.apiKey,
-      });
-
-    case 'anthropic':
-      return new ChatAnthropic({
-        model: config.model,
-        apiKey: config.apiKey,
-      });
-
-    case 'gemini':
-      return new ChatGoogle({
-        model: config.model,
-        apiKey: config.apiKey,
-      });
-
-    default:
-      return new ChatOpenAI({
-        model: config.model,
-        apiKey: config.apiKey,
-        configuration: {
-          baseURL: config.baseUrl!,
-        },
-      });
-  }
+  return new ChatOpenAI({
+    model: config.modelId,
+    apiKey: config.apiKey,
+    configuration: config.baseUrl ? { baseURL: config.baseUrl } : undefined,
+  });
 }

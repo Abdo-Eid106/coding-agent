@@ -139,15 +139,16 @@ export class AgentService {
     const provider = model.provider;
 
     if (!provider.apiKey) {
-      throw new Error(`Provider ${provider.name} has no configured API key`);
+      throw new Error(
+        `Provider ${provider.displayName} has no configured API key`,
+      );
     }
 
     return {
       message,
       context: {
         modelConfig: {
-          provider: provider.name,
-          model: model.name,
+          modelId: model.id,
           apiKey: provider.apiKey,
           baseUrl: provider.baseUrl ?? '',
         },
