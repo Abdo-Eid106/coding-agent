@@ -47,6 +47,7 @@ export const AgentContext = z.object({
     apiKey: z.string(),
     modelId: z.string(),
     baseUrl: z.string().default(''),
+    provider: z.string().optional(),
   }),
   messageId: z.string(),
 });
@@ -62,7 +63,8 @@ export class AgentGraphFactory {
       context: AgentContext,
     })
       .addNode('agent', async (state, runtime) => {
-        const { apiKey, modelId, baseUrl } = runtime.context!.modelConfig;
+        const { apiKey, modelId, baseUrl, provider } =
+          runtime.context!.modelConfig;
 
         const tools = await this.toolManager.getTools();
 
@@ -70,6 +72,7 @@ export class AgentGraphFactory {
           apiKey,
           modelId,
           baseUrl,
+          provider,
         }).bindTools(tools);
 
         const response = await modelWithTools.invoke([

@@ -151,6 +151,7 @@ export class AgentService {
           modelId: model.id,
           apiKey: provider.apiKey,
           baseUrl: provider.baseUrl ?? '',
+          provider: provider.id,
         },
         messageId: message.id,
       },

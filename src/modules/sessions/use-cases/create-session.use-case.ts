@@ -86,6 +86,7 @@ export class CreateSession {
       modelId: aiModel.id,
       apiKey: provider.apiKey!,
       baseUrl: provider.baseUrl,
+      provider: aiModel.provider.id,
     });
 
     const response = await model.invoke([
