@@ -20,6 +20,7 @@ export interface BashOptions {
   maxOutputLength?: number | undefined;
   shell?: string | undefined;
   env?: NodeJS.ProcessEnv | undefined;
+  signal?: AbortSignal;
 }
 
 export interface BashResult {
@@ -35,6 +36,7 @@ export async function bash({
   maxOutputLength = 10_000,
   shell,
   env,
+  signal,
 }: BashOptions): Promise<BashResult> {
   try {
     const { stdout, stderr } = await execAsync(command, {
@@ -42,6 +44,7 @@ export async function bash({
       timeout,
       maxBuffer: 10 * 1024 * 1024,
       shell,
+      signal,
       env: {
         ...process.env,
         ...env,
@@ -54,6 +57,10 @@ export async function bash({
       exitCode: 0,
     };
   } catch (error) {
+    if (signal?.aborted) {
+      throw error;
+    }
+
     const err = error as Error & {
       code?: number;
       stdout?: string;
@@ -123,7 +130,7 @@ export const bashGraph = new StateGraph(BashState)
       status: matchedOption.decision,
     };
   })
-  .addNode('execute', async (state) => {
+  .addNode('execute', async (state, config) => {
     const result = await bash({
       command: state.command,
       cwd: state.cwd,
@@ -131,6 +138,7 @@ export const bashGraph = new StateGraph(BashState)
       maxOutputLength: state.maxOutputLength,
       shell: state.shell,
       env: state.env,
+      signal: config.signal,
     });
 
     return { result };
@@ -148,8 +156,8 @@ export const bashGraph = new StateGraph(BashState)
   .compile();
 
 export const bashTool = tool(
-  async (input) => {
-    const state = await bashGraph.invoke(input);
+  async (input, config) => {
+    const state = await bashGraph.invoke(input, config);
 
     if (state.status === CommandDecision.DENY) {
       return JSON.stringify({
