@@ -16,7 +16,7 @@ export class Provider {
   displayName: string;
 
   @Property({ type: 'varchar', nullable: true })
-  apiKey?: string & Opt;
+  apiKey?: string;
 
   @Property({ type: 'varchar', nullable: true })
   baseUrl?: string & Opt;

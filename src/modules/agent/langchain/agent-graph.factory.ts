@@ -47,7 +47,7 @@ export const AgentContext = z.object({
     apiKey: z.string(),
     modelId: z.string(),
     baseUrl: z.string().default(''),
-    provider: z.string().optional(),
+    provider: z.string(),
   }),
   messageId: z.string(),
 });
