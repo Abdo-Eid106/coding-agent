@@ -55,62 +55,78 @@ export class ToolsProjectionHandler {
   ): Promise<void> {
     return this.withErrorHandling(async () => {
       for await (const data of projection) {
-        const event = this.constructEvent(ctx, data);
-
-        if (event.type == AgentEventEnum.TOOL_START) {
-          const toolCall = this.em.create(ToolCall, {
-            name: event.payload.name,
-            toolCallId: event.payload.toolCallId,
-            input: event.payload.input,
-            message: event.messageId,
-          });
-          event.payload.id = toolCall.id;
-        } else {
-          const toolCall = await this.em.findOne(ToolCall, {
-            toolCallId: event.payload.toolCallId,
-          });
-          if (!toolCall) return;
-          toolCall.output = event.payload.output;
-          event.payload.id = toolCall.id;
-          toolCall.finishedAt = new Date();
-        }
-        await this.em.flush();
-
-        this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+        data.event == AgentEventEnum.TOOL_START
+          ? await this.handleToolCallStarted(ctx, data)
+          : await this.handleToolCallFinished(ctx, data);
       }
     });
   }
 
-  private constructEvent(
+  async handleToolCallStarted(
     ctx: ToolProjectionContext,
-    data: ToolStartedData | ToolFinishedData,
-  ): ToolCallEvent {
-    const base = { toolCallId: data.tool_call_id, name: data.tool_name };
+    data: ToolStartedData,
+  ) {
+    const event: ToolCallEvent = {
+      type: AgentEventEnum.TOOL_START,
+      sessionId: ctx.sessionId,
+      messageId: ctx.messageId,
+      payload: {
+        id: 'dummy',
+        toolCallId: data.tool_call_id,
+        name: data.tool_name,
+        input: this.parseIfJson(data.input),
+        startedAt: new Date(),
+      },
+    };
 
-    const event: ToolCallEvent =
-      data.event === 'tool-started'
-        ? {
-            type: AgentEventEnum.TOOL_START,
-            sessionId: ctx.sessionId,
-            messageId: ctx.messageId,
-            payload: {
-              ...base,
-              input: this.parseIfJson(data.input),
-              startedAt: new Date(),
-            },
-          }
-        : {
-            type: AgentEventEnum.TOOL_END,
-            sessionId: ctx.sessionId,
-            messageId: ctx.messageId,
-            payload: {
-              ...base,
-              output: this.parseIfJson(data.output?.lc_kwargs?.content),
-              finishedAt: new Date(),
-            },
-          };
+    let toolCall = await this.em.findOne(ToolCall, {
+      toolCallId: event.payload.toolCallId,
+    });
+    if (!toolCall) {
+      const { id, ...rest } = event.payload;
+      toolCall = this.em.create(ToolCall, {
+        ...rest,
+        message: ctx.messageId,
+      });
+    }
 
-    return event;
+    event.payload.id = toolCall.id;
+    this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+
+    await this.em.flush();
+  }
+
+  async handleToolCallFinished(
+    ctx: ToolProjectionContext,
+    data: ToolFinishedData,
+  ) {
+    const event: ToolCallEvent = {
+      type: AgentEventEnum.TOOL_END,
+      sessionId: ctx.sessionId,
+      messageId: ctx.messageId,
+      payload: {
+        id: 'dummy',
+        toolCallId: data.tool_call_id,
+        name: data.tool_name,
+        output: this.parseIfJson(data.output?.lc_kwargs?.content),
+        finishedAt: new Date(),
+      },
+    };
+
+    const toolCall = await this.em.findOne(ToolCall, {
+      toolCallId: event.payload.toolCallId,
+    });
+    if (!toolCall) return;
+
+    this.em.assign(toolCall, {
+      output: event.payload.output,
+      finishedAt: new Date(),
+    });
+
+    event.payload.id = toolCall.id;
+    this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+
+    await this.em.flush();
   }
 
   private parseIfJson(value: unknown) {

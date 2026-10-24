@@ -15,7 +15,7 @@ export interface AgentStreamEvent {
 
 export interface ToolCallEvent extends AgentStreamEvent {
   payload: {
-    id?: string;
+    id: string;
     toolCallId: string;
     name: string;
     input?: object;

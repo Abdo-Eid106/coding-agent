@@ -7,6 +7,7 @@ import { MessagesProjectionHandler } from './langchain/projections/messages-proj
 import { ToolsProjectionHandler } from './langchain/projections/tools-projection-handler.js';
 import { StreamCompletionHandler } from './langchain/projections/stream-completion-handler.js';
 import { SessionModule } from '../sessions/sessions.module.js';
+import { AgentConroller } from './agent.controller.js';
 
 @Module({
   imports: [SessionModule],
@@ -19,6 +20,7 @@ import { SessionModule } from '../sessions/sessions.module.js';
     ToolsProjectionHandler,
     StreamCompletionHandler,
   ],
+  controllers: [AgentConroller],
   exports: [AgentService],
 })
 export class AgentModule {}

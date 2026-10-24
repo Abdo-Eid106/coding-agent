@@ -22,16 +22,8 @@ import {
 } from '../../../database/entities/message.entity.js';
 import { AIModel } from '../../../database/entities/ai-model.entity.js';
 import { SessionManager } from '../../sessions/session.manager.js';
-
-interface RunAgentDto {
-  messageId: string;
-}
-
-interface ResumeAgentDto {
-  messageId: string;
-  interruptId: string;
-  payload: object;
-}
+import { RunAgentDto } from '../dto/run-agent.dto.js';
+import { ResumeInterruptDto } from '../dto/resume-interrupt.dto.js';
 
 @Injectable()
 export class AgentService {
@@ -59,7 +51,7 @@ export class AgentService {
     await this.stream(input, message.session.id, context);
   }
 
-  async resume(dto: ResumeAgentDto) {
+  async resume(dto: ResumeInterruptDto) {
     const { messageId, interruptId, payload } = dto;
     const { message, context } = await this.prepareRun(messageId);
 
