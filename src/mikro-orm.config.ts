@@ -1,15 +1,17 @@
 import 'dotenv/config';
 
-import { defineConfig, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import path from 'node:path';
+import { defineConfig, SqliteDriver } from '@mikro-orm/sqlite';
 import { Migrator } from '@mikro-orm/migrations';
-import { entities } from './database/entities/entities.js';
 import { SeedManager } from '@mikro-orm/seeder';
+import { entities } from './database/entities/entities.js';
 
 export default defineConfig({
-  clientUrl: process.env.DATABASE_URL!,
-  driver: PostgreSqlDriver,
+  dbName: path.resolve(process.cwd(), 'data', 'app.sqlite'),
   entities,
   extensions: [Migrator, SeedManager],
+  driver: SqliteDriver,
+
   migrations: {
     path: 'dist/database/migrations',
     pathTs: 'src/database/migrations',
@@ -24,12 +26,13 @@ export default defineConfig({
     snapshotOnMigrate: true,
     emit: 'ts',
   },
+
   seeder: {
     path: 'dist/database/seeders',
     pathTs: 'src/database/seeders',
     defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
-    emit: 'ts', // seeder generation mode
-    fileName: (className: string) => className, // seeder file naming convention
+    emit: 'ts',
+    fileName: (className: string) => className,
   },
 });

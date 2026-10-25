@@ -1,12 +1,8 @@
 {
-  "name": "public",
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": [],
   "tables": [
     {
       "name": "agent_settings",
-      "schema": "public",
       "columns": {
         "command_approval_mode": {
           "name": "command_approval_mode",
@@ -31,7 +27,7 @@
         },
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
@@ -44,17 +40,17 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamptz(6)",
+          "type": "datetime",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 6,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
@@ -71,7 +67,7 @@
           ],
           "composite": false,
           "constraint": true,
-          "keyName": "agent_settings_pkey",
+          "keyName": "primary",
           "primary": true,
           "unique": true
         }
@@ -79,8 +75,8 @@
       "checks": [
         {
           "name": "agent_settings_command_approval_mode_check",
-          "expression": "\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask')",
-          "definition": "check (\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask'))",
+          "expression": "`command_approval_mode` in ('always_ask', 'ask_unless_allowlisted', 'never_ask')",
+          "definition": "check (`command_approval_mode` in ('always_ask', 'ask_unless_allowlisted', 'never_ask'))",
           "columnName": "command_approval_mode"
         }
       ],
@@ -90,70 +86,69 @@
     },
     {
       "name": "aimodel",
-      "schema": "public",
       "columns": {
         "display_name": {
           "name": "display_name",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "provider_id": {
           "name": "provider_id",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         }
       },
       "indexes": [
         {
           "columnNames": [
-            "id"
+            "provider_id"
           ],
           "composite": false,
-          "constraint": true,
-          "keyName": "aimodel_pkey",
-          "primary": true,
-          "unique": true
+          "constraint": false,
+          "keyName": "aimodel_provider_id_index",
+          "primary": false,
+          "unique": false
         },
         {
           "columnNames": [
@@ -164,6 +159,16 @@
           "keyName": "aimodel_provider_id_index",
           "primary": false,
           "unique": false
+        },
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "primary",
+          "primary": true,
+          "unique": true
         }
       ],
       "checks": [],
@@ -174,11 +179,11 @@
             "provider_id"
           ],
           "constraintName": "aimodel_provider_id_foreign",
-          "localTableName": "public.aimodel",
+          "localTableName": "aimodel",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.provider",
+          "referencedTableName": "provider",
           "deleteRule": "cascade"
         }
       },
@@ -186,7 +191,6 @@
     },
     {
       "name": "message",
-      "schema": "public",
       "columns": {
         "command_approval_mode": {
           "name": "command_approval_mode",
@@ -228,13 +232,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamptz(6)",
+          "type": "datetime",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 6,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
@@ -245,7 +249,7 @@
         },
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
@@ -258,28 +262,11 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "model_id": {
           "name": "model_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 255,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "string"
-        },
-        "parent_message_id": {
-          "name": "parent_message_id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -292,7 +279,24 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
+        },
+        "parent_message_id": {
+          "name": "parent_message_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
         },
         "role": {
           "name": "role",
@@ -316,7 +320,7 @@
         },
         "session_id": {
           "name": "session_id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -329,17 +333,37 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "parent_message_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "message_parent_message_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "session_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "message_session_id_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": [
             "id"
           ],
           "composite": false,
           "constraint": true,
-          "keyName": "message_pkey",
+          "keyName": "primary",
           "primary": true,
           "unique": true
         }
@@ -347,14 +371,14 @@
       "checks": [
         {
           "name": "message_command_approval_mode_check",
-          "expression": "\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask')",
-          "definition": "check (\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask'))",
+          "expression": "`command_approval_mode` in ('always_ask', 'ask_unless_allowlisted', 'never_ask')",
+          "definition": "check (`command_approval_mode` in ('always_ask', 'ask_unless_allowlisted', 'never_ask'))",
           "columnName": "command_approval_mode"
         },
         {
           "name": "message_role_check",
-          "expression": "\"role\" in ('user', 'ai')",
-          "definition": "check (\"role\" in ('user', 'ai'))",
+          "expression": "`role` in ('user', 'ai')",
+          "definition": "check (`role` in ('user', 'ai'))",
           "columnName": "role"
         }
       ],
@@ -365,11 +389,11 @@
             "parent_message_id"
           ],
           "constraintName": "message_parent_message_id_foreign",
-          "localTableName": "public.message",
+          "localTableName": "message",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.message",
+          "referencedTableName": "message",
           "deleteRule": "set null"
         },
         "message_session_id_foreign": {
@@ -377,11 +401,11 @@
             "session_id"
           ],
           "constraintName": "message_session_id_foreign",
-          "localTableName": "public.message",
+          "localTableName": "message",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.session",
+          "referencedTableName": "session",
           "deleteRule": "cascade"
         }
       },
@@ -389,11 +413,10 @@
     },
     {
       "name": "project",
-      "schema": "public",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
@@ -406,41 +429,41 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "path": {
           "name": "path",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         }
       },
       "indexes": [
@@ -450,7 +473,7 @@
           ],
           "composite": false,
           "constraint": true,
-          "keyName": "project_pkey",
+          "keyName": "primary",
           "primary": true,
           "unique": true
         }
@@ -462,78 +485,87 @@
     },
     {
       "name": "provider",
-      "schema": "public",
       "columns": {
         "api_key": {
           "name": "api_key",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "base_url": {
           "name": "base_url",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "display_name": {
           "name": "display_name",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": true,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "primary",
+          "primary": true,
+          "unique": true
+        },
         {
           "columnNames": [
             "display_name"
@@ -542,16 +574,6 @@
           "constraint": true,
           "keyName": "provider_display_name_unique",
           "primary": false,
-          "unique": true
-        },
-        {
-          "columnNames": [
-            "id"
-          ],
-          "composite": false,
-          "constraint": true,
-          "keyName": "provider_pkey",
-          "primary": true,
           "unique": true
         }
       ],
@@ -562,11 +584,10 @@
     },
     {
       "name": "session",
-      "schema": "public",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
@@ -579,11 +600,11 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "project_id": {
           "name": "project_id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -596,24 +617,24 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "title": {
           "name": "title",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         }
       },
       "indexes": [
@@ -623,9 +644,19 @@
           ],
           "composite": false,
           "constraint": true,
-          "keyName": "session_pkey",
+          "keyName": "primary",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "project_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "session_project_id_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [],
@@ -636,11 +667,11 @@
             "project_id"
           ],
           "constraintName": "session_project_id_foreign",
-          "localTableName": "public.session",
+          "localTableName": "session",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.project",
+          "referencedTableName": "project",
           "deleteRule": "set null"
         }
       },
@@ -648,11 +679,10 @@
     },
     {
       "name": "tool_call",
-      "schema": "public",
       "columns": {
         "error": {
           "name": "error",
-          "type": "jsonb",
+          "type": "json",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -669,13 +699,13 @@
         },
         "finished_at": {
           "name": "finished_at",
-          "type": "timestamptz(6)",
+          "type": "datetime",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": 6,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
@@ -686,7 +716,7 @@
         },
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": true,
@@ -699,11 +729,11 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "input": {
           "name": "input",
-          "type": "jsonb",
+          "type": "json",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -720,7 +750,7 @@
         },
         "message_id": {
           "name": "message_id",
-          "type": "uuid",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -733,28 +763,28 @@
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "uuid"
+          "mappedType": "text"
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "output": {
           "name": "output",
-          "type": "jsonb",
+          "type": "json",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -771,13 +801,13 @@
         },
         "started_at": {
           "name": "started_at",
-          "type": "timestamptz(6)",
+          "type": "datetime",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": 6,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
@@ -788,23 +818,33 @@
         },
         "tool_call_id": {
           "name": "tool_call_id",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": true,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "primary",
+          "primary": true,
+          "unique": true
+        },
         {
           "columnNames": [
             "message_id"
@@ -817,13 +857,13 @@
         },
         {
           "columnNames": [
-            "id"
+            "message_id"
           ],
           "composite": false,
-          "constraint": true,
-          "keyName": "tool_call_pkey",
-          "primary": true,
-          "unique": true
+          "constraint": false,
+          "keyName": "tool_call_message_id_index",
+          "primary": false,
+          "unique": false
         },
         {
           "columnNames": [
@@ -844,11 +884,11 @@
             "message_id"
           ],
           "constraintName": "tool_call_message_id_foreign",
-          "localTableName": "public.tool_call",
+          "localTableName": "tool_call",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.message",
+          "referencedTableName": "message",
           "deleteRule": "cascade"
         }
       },

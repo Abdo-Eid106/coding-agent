@@ -1,22 +1,18 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Global, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { SqliteDriver } from '@mikro-orm/sqlite';
+import path from 'node:path';
 import { entities } from './entities/entities.js';
+
+const databasePath = path.resolve(process.cwd(), 'data', 'app.sqlite');
 
 @Global()
 @Module({
   imports: [
-    MikroOrmModule.forRootAsync({
-      driver: PostgreSqlDriver,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          clientUrl: config.getOrThrow('DATABASE_URL'),
-          driver: PostgreSqlDriver,
-          entities,
-        };
-      },
+    MikroOrmModule.forRoot({
+      driver: SqliteDriver,
+      dbName: databasePath,
+      entities,
     }),
   ],
 })
