@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { AppEvent } from '../../events/enums/app-events.enum.js';
+import { AppEvent } from '../enums/app-events.enum.js';
 import { AgentService } from './agent-service/agent.service.js';
 import { ResumeInterruptDto } from '../dto/resume-interrupt.dto.js';
 import { RunAgentDto } from '../dto/run-agent.dto.js';

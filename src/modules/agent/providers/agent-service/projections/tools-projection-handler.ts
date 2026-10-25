@@ -8,9 +8,10 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   AgentEventEnum,
+  ErrorEvent,
   ToolCallEvent,
-} from '../../../interfaces/agent-stream-event.js';
-import { AppEvent } from '../../../../events/enums/app-events.enum.js';
+} from '../../../interfaces/agent-event.js';
+import { AppEvent } from '../../../enums/app-events.enum.js';
 import { ToolFinishedData, ToolStartedData } from '@langchain/protocol';
 import { ToolCall } from '../../../../../database/entities/tool-call.entity.js';
 
@@ -68,9 +69,8 @@ export class ToolsProjectionHandler {
   ) {
     const event: ToolCallEvent = {
       type: AgentEventEnum.TOOL_START,
-      sessionId: ctx.sessionId,
-      messageId: ctx.messageId,
-      payload: {
+      context: ctx,
+      data: {
         id: 'dummy',
         toolCallId: data.tool_call_id,
         name: data.tool_name,
@@ -80,18 +80,18 @@ export class ToolsProjectionHandler {
     };
 
     let toolCall = await this.em.findOne(ToolCall, {
-      toolCallId: event.payload.toolCallId,
+      toolCallId: event.data.toolCallId,
     });
     if (!toolCall) {
-      const { id, ...rest } = event.payload;
+      const { id, ...rest } = event.data;
       toolCall = this.em.create(ToolCall, {
         ...rest,
         message: ctx.messageId,
       });
     }
 
-    event.payload.id = toolCall.id;
-    this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+    event.data.id = toolCall.id;
+    this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
 
     await this.em.flush();
   }
@@ -102,9 +102,8 @@ export class ToolsProjectionHandler {
   ) {
     const event: ToolCallEvent = {
       type: AgentEventEnum.TOOL_END,
-      sessionId: ctx.sessionId,
-      messageId: ctx.messageId,
-      payload: {
+      context: ctx,
+      data: {
         id: 'dummy',
         toolCallId: data.tool_call_id,
         name: data.tool_name,
@@ -114,17 +113,17 @@ export class ToolsProjectionHandler {
     };
 
     const toolCall = await this.em.findOne(ToolCall, {
-      toolCallId: event.payload.toolCallId,
+      toolCallId: event.data.toolCallId,
     });
     if (!toolCall) return;
 
     this.em.assign(toolCall, {
-      output: event.payload.output,
+      output: event.data.output,
       finishedAt: new Date(),
     });
 
-    event.payload.id = toolCall.id;
-    this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+    event.data.id = toolCall.id;
+    this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
 
     await this.em.flush();
   }
@@ -145,13 +144,16 @@ export class ToolsProjectionHandler {
     } catch (error: unknown) {
       if (this.isAbortError(error)) return;
 
-      console.log('error = ', error);
-      this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred',
-      });
+      const message =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+
+      const event: ErrorEvent = {
+        type: AgentEventEnum.ERROR,
+        context: {},
+        data: { message },
+      };
+
+      this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
     }
   }
 

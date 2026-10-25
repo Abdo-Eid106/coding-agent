@@ -14,7 +14,7 @@ import {
 import { CreateSessionDto } from '../dto/create-session.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
 import { ModelFactory } from '../../agent/factories/model-factory.js';
-import { AppEvent } from '../../events/enums/app-events.enum.js';
+import { AppEvent } from '../../agent/enums/app-events.enum.js';
 
 const TITLE_SYSTEM_PROMPT =
   "Generate a short title (max 6 words) for a chat that starts with the user's message. " +

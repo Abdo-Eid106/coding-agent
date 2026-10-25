@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AppEvent } from '../events/enums/app-events.enum.js';
+import { AppEvent } from '../agent/enums/app-events.enum.js';
 import { SessionStatus } from './enum/session.status.js';
+import {
+  AgentEventEnum,
+  SessionEvent,
+} from '../agent/interfaces/agent-event.js';
 
 @Injectable()
 export class SessionManager {
@@ -16,10 +20,13 @@ export class SessionManager {
     const controller = new AbortController();
     this.sessions.set(sessionId, controller);
 
-    this.em.emit(AppEvent.AGENT_SESSION_STATUS_CHANGED, {
-      sessionId,
-      status: SessionStatus.RUNNING,
-    });
+    const event: SessionEvent = {
+      type: AgentEventEnum.SESSION_STATUS,
+      context: { sessionId },
+      data: { status: SessionStatus.RUNNING },
+    };
+
+    this.em.emit(AppEvent.AGENT_EVENT, event);
 
     return controller;
   }
@@ -31,10 +38,13 @@ export class SessionManager {
     this.sessions.delete(sessionId);
     controller.abort();
 
-    this.em.emit(AppEvent.AGENT_SESSION_STATUS_CHANGED, {
-      sessionId,
-      status: SessionStatus.IDLE,
-    });
+    const event: SessionEvent = {
+      type: AgentEventEnum.SESSION_STATUS,
+      context: { sessionId },
+      data: { status: SessionStatus.IDLE },
+    };
+
+    this.em.emit(AppEvent.AGENT_EVENT, event);
   }
 
   getRunningSessions() {

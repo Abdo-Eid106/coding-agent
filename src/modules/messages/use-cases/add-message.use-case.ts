@@ -8,7 +8,7 @@ import {
 import { AddMessageDto } from '../dto/add-message.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AppEvent } from '../../events/enums/app-events.enum.js';
+import { AppEvent } from '../../agent/enums/app-events.enum.js';
 import { SettingsService } from '../../settings/settings.service.js';
 
 @Injectable()

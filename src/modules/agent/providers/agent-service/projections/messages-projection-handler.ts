@@ -2,15 +2,13 @@ import { ChatModelStream } from '@langchain/langgraph';
 import { EntityManager } from '@mikro-orm/core';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  AgentEventEnum,
-  TokenEvent,
-} from '../../../interfaces/agent-stream-event.js';
+import { AgentEventEnum, TokenEvent } from '../../../interfaces/agent-event.js';
 import {
   Message,
   MessageRole,
 } from '../../../../../database/entities/message.entity.js';
-import { AppEvent } from '../../../../events/enums/app-events.enum.js';
+import { AppEvent } from '../../../enums/app-events.enum.js';
+import { ErrorEvent } from '../../../interfaces/agent-event.js';
 
 type ChatModelStreamHandle = Omit<ChatModelStream, 'then'>;
 
@@ -72,22 +70,25 @@ export class MessagesProjectionHandler {
   private emitToken(ctx: ProjectionContext, replyId: string, token: string) {
     const event: TokenEvent = {
       type: AgentEventEnum.TOKEN,
-      sessionId: ctx.sessionId,
-      messageId: ctx.messageId,
-      payload: { token, replyId },
+      context: ctx,
+      data: { token, replyId },
     };
-    this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+    this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
   }
 
   private emitError(ctx: ProjectionContext, error: unknown) {
     if (this.isAbortError(error)) return;
 
-    this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
-      sessionId: ctx.sessionId,
-      messageId: ctx.messageId,
-      error:
-        error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    const message =
+      error instanceof Error ? error.message : 'An unexpected error occurred';
+
+    const event: ErrorEvent = {
+      type: AgentEventEnum.ERROR,
+      context: ctx,
+      data: { message },
+    };
+
+    this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
   }
 
   private isAbortError(error: unknown): boolean {

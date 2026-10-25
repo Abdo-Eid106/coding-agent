@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   AgentEventEnum,
-  AgentStreamEvent,
-} from '../../../interfaces/agent-stream-event.js';
-import { AppEvent } from '../../../../events/enums/app-events.enum.js';
+  DoneEvent,
+  Interrupt,
+  InterruptEvent,
+} from '../../../interfaces/agent-event.js';
+import { AppEvent } from '../../../enums/app-events.enum.js';
 import { GraphStream } from '../agent-graph.factory.js';
 
 @Injectable()
@@ -16,21 +18,19 @@ export class StreamCompletionHandler {
     result: GraphStream,
   ): Promise<void> {
     return this.withErrorHandling(async () => {
-      const event: AgentStreamEvent = result.interrupted
+      const event: InterruptEvent | DoneEvent = result.interrupted
         ? {
             type: AgentEventEnum.INTERRUPT,
-            sessionId: ctx.sessionId,
-            messageId: ctx.messageId,
-            payload: result.interrupts[0],
+            context: ctx,
+            data: result.interrupts[0] as Interrupt,
           }
         : {
             type: AgentEventEnum.DONE,
-            sessionId: ctx.sessionId,
-            messageId: ctx.messageId,
-            payload: null,
+            context: ctx,
+            data: null,
           };
 
-      this.eventEmitter.emit(AppEvent.AGENT_STREAM_EVENT, event);
+      this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
     });
   }
 
@@ -42,7 +42,7 @@ export class StreamCompletionHandler {
     } catch (error: unknown) {
       if (this.isAbortError(error)) return;
 
-      this.eventEmitter.emit(AppEvent.AGENT_STREAM_ERROR, {
+      this.eventEmitter.emit(AppEvent.AGENT_EVENT, {
         error:
           error instanceof Error
             ? error.message

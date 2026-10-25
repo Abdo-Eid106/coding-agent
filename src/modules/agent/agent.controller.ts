@@ -4,12 +4,16 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  MessageEvent,
   Post,
+  Sse,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ResumeInterruptDto } from './dto/resume-interrupt.dto.js';
-import { AppEvent } from '../events/enums/app-events.enum.js';
+import { AppEvent } from './enums/app-events.enum.js';
 import { ToolManager } from './providers/tool-manager.js';
+import { Observable } from 'rxjs';
+import { AgentEvent } from './interfaces/agent-event.js';
 
 @Controller()
 export class AgentConroller {
@@ -32,5 +36,22 @@ export class AgentConroller {
   @Post('reload-mcp-servers')
   async reload() {
     return await this.toolManager.reload();
+  }
+
+  @Sse('events')
+  streamEvents(): Observable<MessageEvent> {
+    return new Observable<MessageEvent>((subscriber) => {
+      const onAgentEvent = (event: AgentEvent) => {
+        subscriber.next({
+          type: event.type,
+          data: event,
+        });
+      };
+
+      this.em.on(AppEvent.AGENT_EVENT, onAgentEvent);
+      return () => {
+        this.em.off(AppEvent.AGENT_EVENT, onAgentEvent);
+      };
+    });
   }
 }
