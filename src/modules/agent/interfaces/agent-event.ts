@@ -60,13 +60,6 @@ export interface InterruptEvent extends AgentEvent {
   data: Interrupt;
 }
 
-export interface ErrorEvent {
-  type: AgentEventEnum.ERROR;
-  data: {
-    message: string;
-  };
-}
-
 export interface ErrorEvent extends AgentEvent {
   type: AgentEventEnum.ERROR;
   data: {
