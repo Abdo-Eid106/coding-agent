@@ -14,6 +14,7 @@ import z from 'zod';
 
 import { createModel } from './create-model.js';
 import { ToolManager } from '../providers/tool-manager.js';
+import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
 
 const createSystemPrompt = (workingDirectory?: string) =>
   new SystemMessage(
@@ -49,6 +50,7 @@ export const AgentContext = z.object({
     baseUrl: z.string().default(''),
     provider: z.string(),
   }),
+  commandApprovalMode: z.enum(CommandApprovalMode),
   messageId: z.string(),
 });
 

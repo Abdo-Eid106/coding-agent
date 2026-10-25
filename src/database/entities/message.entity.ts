@@ -10,6 +10,7 @@ import { randomUUIDv7 } from 'node:crypto';
 import { Session } from './session.entity.js';
 import { Collection, type Opt } from '@mikro-orm/core';
 import { ToolCall } from './tool-call.entity.js';
+import { CommandApprovalMode } from '../../modules/settings/enums/command-approval-mode.js';
 
 export enum MessageRole {
   USER = 'user',
@@ -26,6 +27,12 @@ export class Message {
 
   @Property({ type: 'varchar', nullable: true })
   modelId?: string & Opt;
+
+  @Enum({
+    items: () => CommandApprovalMode,
+    nullable: true,
+  })
+  commandApprovalMode?: CommandApprovalMode;
 
   @Enum(() => MessageRole)
   role: MessageRole;

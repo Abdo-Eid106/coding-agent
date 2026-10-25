@@ -10,6 +10,8 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import z from 'zod';
 import { classifyCommand, CommandDecision } from './classify-command.js';
+import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
+import { AgentGraphContext } from '../langchain/agent-graph.factory.js';
 
 const execAsync = promisify(exec);
 
@@ -106,10 +108,21 @@ const BashState = new StateSchema({
 });
 
 export const bashGraph = new StateGraph(BashState)
-  .addNode('classify', async (state) => {
+  .addNode('classify', async (state, config) => {
+    const context = config.context as AgentGraphContext;
+    const mode = context.commandApprovalMode;
     const decision = classifyCommand(state.command);
-    if (decision !== CommandDecision.ASK) {
+
+    if (decision == CommandDecision.DENY) {
       return { status: decision };
+    }
+
+    if (
+      mode == CommandApprovalMode.NEVER_ASK ||
+      (mode == CommandApprovalMode.ASK_UNLESS_ALLOWLISTED &&
+        decision == CommandDecision.ALLOW)
+    ) {
+      return { status: CommandDecision.ALLOW };
     }
 
     const response = interrupt({

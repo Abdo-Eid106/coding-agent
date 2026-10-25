@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { SettingsService } from '../../settings/settings.service.js';
 
 import { Session } from '../../../database/entities/session.entity.js';
 import { Project } from '../../../database/entities/project.entity.js';
@@ -27,6 +28,7 @@ export class CreateSession {
     private readonly em: EntityManager,
     private readonly getModel: GetModel,
     private readonly eventEmitter: EventEmitter2,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async execute(dto: CreateSessionDto) {
@@ -38,12 +40,14 @@ export class CreateSession {
       project,
     });
 
+    const settings = await this.settingsService.get();
     const message = this.em.create(Message, {
       session,
       id: messageId,
       content: messageContent,
       role: MessageRole.USER,
       modelId,
+      commandApprovalMode: settings.commandApprovalMode,
     });
 
     await this.em.flush();

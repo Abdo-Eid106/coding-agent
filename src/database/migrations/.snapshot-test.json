@@ -188,6 +188,27 @@
       "name": "message",
       "schema": "public",
       "columns": {
+        "command_approval_mode": {
+          "name": "command_approval_mode",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "always_ask",
+            "ask_unless_allowlisted",
+            "never_ask"
+          ],
+          "mappedType": "enum"
+        },
         "content": {
           "name": "content",
           "type": "text",
@@ -324,6 +345,12 @@
         }
       ],
       "checks": [
+        {
+          "name": "message_command_approval_mode_check",
+          "expression": "\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask')",
+          "definition": "check (\"command_approval_mode\" in ('always_ask', 'ask_unless_allowlisted', 'never_ask'))",
+          "columnName": "command_approval_mode"
+        },
         {
           "name": "message_role_check",
           "expression": "\"role\" in ('user', 'ai')",

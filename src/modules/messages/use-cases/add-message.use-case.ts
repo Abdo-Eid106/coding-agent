@@ -9,6 +9,7 @@ import { AddMessageDto } from '../dto/add-message.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AppEvent } from '../../events/enums/app-events.enum.js';
+import { SettingsService } from '../../settings/settings.service.js';
 
 @Injectable()
 export class AddMessage {
@@ -16,6 +17,7 @@ export class AddMessage {
     private readonly em: EntityManager,
     private readonly getModel: GetModel,
     private readonly eventEmitter: EventEmitter2,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async execute(
@@ -33,6 +35,7 @@ export class AddMessage {
     }
 
     await this.getModel.execute(dto.modelId);
+    const settings = await this.settingsService.get();
 
     const message = this.em.create(Message, {
       session: sessionId,
@@ -40,6 +43,7 @@ export class AddMessage {
       id: dto.messageId,
       modelId: dto.modelId,
       content: dto.messageContent,
+      commandApprovalMode: settings.commandApprovalMode,
     });
 
     await this.em.flush();

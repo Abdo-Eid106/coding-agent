@@ -24,6 +24,7 @@ import { AIModel } from '../../../database/entities/ai-model.entity.js';
 import { SessionManager } from '../../sessions/session.manager.js';
 import { RunAgentDto } from '../dto/run-agent.dto.js';
 import { ResumeInterruptDto } from '../dto/resume-interrupt.dto.js';
+import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
 
 @Injectable()
 export class AgentService {
@@ -136,17 +137,19 @@ export class AgentService {
       );
     }
 
-    return {
-      message,
-      context: {
-        modelConfig: {
-          modelId: model.id,
-          apiKey: provider.apiKey,
-          baseUrl: provider.baseUrl ?? '',
-          provider: provider.id,
-        },
-        messageId: message.id,
+    const context: AgentGraphContext = {
+      modelConfig: {
+        modelId: model.id,
+        apiKey: provider.apiKey,
+        baseUrl: provider.baseUrl ?? '',
+        provider: provider.id,
       },
+      commandApprovalMode:
+        message.commandApprovalMode ??
+        CommandApprovalMode.ASK_UNLESS_ALLOWLISTED,
+      messageId: message.id,
     };
+
+    return { message, context };
   }
 }
