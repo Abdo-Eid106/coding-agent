@@ -28,6 +28,9 @@ export class ToolCall {
   @Property({ type: 'json', nullable: true })
   output?: unknown & Opt;
 
+  @Property({ type: 'json', nullable: true })
+  error?: unknown & Opt;
+
   @Property({ type: 'datetime' })
   startedAt: Date & Opt = new Date();
 

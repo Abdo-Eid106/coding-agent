@@ -6,6 +6,7 @@ export enum AgentEventEnum {
   INTERRUPT = 'interrupt',
   TOOL_START = 'tool-started',
   TOOL_END = 'tool-finished',
+  TOOL_ERROR = 'tool-error',
   ERROR = 'error',
   SESSION_STATUS = 'session_status',
 }
@@ -22,13 +23,17 @@ export interface AgentEvent {
 }
 
 export interface ToolCallEvent extends AgentEvent {
-  type: AgentEventEnum.TOOL_START | AgentEventEnum.TOOL_END;
+  type:
+    | AgentEventEnum.TOOL_START
+    | AgentEventEnum.TOOL_END
+    | AgentEventEnum.TOOL_ERROR;
   data: {
     id: string;
     toolCallId: string;
     name: string;
     input?: object;
     output?: object;
+    error?: object;
     startedAt?: Date;
     finishedAt?: Date;
   };

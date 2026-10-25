@@ -12,15 +12,21 @@ import {
   ToolCallEvent,
 } from '../../../interfaces/agent-event.js';
 import { AppEvent } from '../../../enums/app-events.enum.js';
-import { ToolFinishedData, ToolStartedData } from '@langchain/protocol';
+import {
+  ToolErrorData,
+  ToolFinishedData,
+  ToolStartedData,
+} from '@langchain/protocol';
 import { ToolCall } from '../../../../../database/entities/tool-call.entity.js';
 
-type ToolProjection = StreamChannel<ToolStartedData | ToolFinishedData>;
+type ToolProjection = StreamChannel<
+  ToolStartedData | ToolFinishedData | ToolErrorData
+>;
 
 export const toolEventsTransformer = () => {
-  const channel = new StreamChannel<ToolStartedData | ToolFinishedData>(
-    'tools',
-  );
+  const channel = new StreamChannel<
+    ToolStartedData | ToolFinishedData | ToolErrorData
+  >('tools');
 
   return {
     init: () => ({ tools: channel }),
@@ -28,7 +34,11 @@ export const toolEventsTransformer = () => {
       if (event.method === 'tools') {
         const data = event.params.data as ToolsEventData;
 
-        if (data.event === 'tool-started' || data.event === 'tool-finished') {
+        if (
+          data.event === 'tool-started' ||
+          data.event === 'tool-finished' ||
+          data.event === 'tool-error'
+        ) {
           channel.push(data);
         }
       }
@@ -58,7 +68,9 @@ export class ToolsProjectionHandler {
       for await (const data of projection) {
         data.event == AgentEventEnum.TOOL_START
           ? await this.handleToolCallStarted(ctx, data)
-          : await this.handleToolCallFinished(ctx, data);
+          : data.event == AgentEventEnum.TOOL_END
+            ? await this.handleToolCallFinished(ctx, data)
+            : await this.handleToolCallError(ctx, data);
       }
     });
   }
@@ -119,6 +131,35 @@ export class ToolsProjectionHandler {
 
     this.em.assign(toolCall, {
       output: event.data.output,
+      finishedAt: new Date(),
+    });
+
+    event.data.id = toolCall.id;
+    this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
+
+    await this.em.flush();
+  }
+
+  async handleToolCallError(ctx: ToolProjectionContext, data: ToolErrorData) {
+    const event: ToolCallEvent = {
+      type: AgentEventEnum.TOOL_ERROR,
+      context: ctx,
+      data: {
+        id: 'dummy',
+        toolCallId: data.tool_call_id,
+        name: data.tool_name,
+        error: { message: data.message },
+        finishedAt: new Date(),
+      },
+    };
+
+    const toolCall = await this.em.findOne(ToolCall, {
+      toolCallId: event.data.toolCallId,
+    });
+    if (!toolCall) return;
+
+    this.em.assign(toolCall, {
+      error: event.data.error,
       finishedAt: new Date(),
     });
 
