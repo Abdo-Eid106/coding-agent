@@ -11,6 +11,7 @@ import { ProvidersModule } from './modules/providers/providers.module.js';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventsModule } from './modules/events/events.module.js';
 import { AgentModule } from './modules/agent/agent.module.js';
+import { SettingsModule } from './modules/settings/settings.module.js';
 import { APP_PIPE } from '@nestjs/core';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -28,6 +29,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     EventEmitterModule.forRoot({}),
     EventsModule,
     AgentModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

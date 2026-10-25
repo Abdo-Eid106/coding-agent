@@ -4,6 +4,7 @@ import { Project } from './project.entity.js';
 import { Provider } from './provider.entity.js';
 import { Session } from './session.entity.js';
 import { ToolCall } from './tool-call.entity.js';
+import { AgentSettings } from './agent-settings.entity.js';
 
 export const entities = [
   AIModel,
@@ -12,4 +13,5 @@ export const entities = [
   Provider,
   Session,
   ToolCall,
+  AgentSettings,
 ];
