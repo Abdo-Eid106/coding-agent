@@ -23,6 +23,21 @@ type ToolProjection = StreamChannel<
   ToolStartedData | ToolFinishedData | ToolErrorData
 >;
 
+function isInterruptErrorMessage(message: string): boolean {
+  try {
+    const parsed = JSON.parse(message);
+    return (
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      parsed.every(
+        (item) => typeof item === 'object' && item !== null && 'value' in item,
+      )
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const toolEventsTransformer = () => {
   const channel = new StreamChannel<
     ToolStartedData | ToolFinishedData | ToolErrorData
@@ -33,6 +48,12 @@ export const toolEventsTransformer = () => {
     process(event: ProtocolEvent) {
       if (event.method === 'tools') {
         const data = event.params.data as ToolsEventData;
+        if (data.event === 'tool-error') {
+          // Ignore interrupt breakpoints
+          if (isInterruptErrorMessage(data.message)) {
+            return true;
+          }
+        }
 
         if (
           data.event === 'tool-started' ||
