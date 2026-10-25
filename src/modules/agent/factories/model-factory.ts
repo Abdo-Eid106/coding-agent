@@ -10,7 +10,7 @@ type ModelConfig = {
 };
 
 export function ModelFactory(config: ModelConfig) {
-  if (config.baseUrl) {
+  if (config.baseUrl?.length) {
     return new ChatOpenAI({
       model: config.modelId,
       apiKey: config.apiKey,

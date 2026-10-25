@@ -20,7 +20,6 @@ export class AddProviderDto {
   @IsString()
   displayName: string;
 
-  @IsNotEmpty()
   @IsString()
   baseUrl: string;
 
