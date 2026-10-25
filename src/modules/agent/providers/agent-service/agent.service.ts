@@ -19,12 +19,12 @@ import { EntityManager } from '@mikro-orm/core';
 import {
   Message,
   MessageRole,
-} from '../../../database/entities/message.entity.js';
-import { AIModel } from '../../../database/entities/ai-model.entity.js';
-import { SessionManager } from '../../sessions/session.manager.js';
-import { RunAgentDto } from '../dto/run-agent.dto.js';
-import { ResumeInterruptDto } from '../dto/resume-interrupt.dto.js';
-import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
+} from '../../../../database/entities/message.entity.js';
+import { AIModel } from '../../../../database/entities/ai-model.entity.js';
+import { SessionManager } from '../../../sessions/session.manager.js';
+import { RunAgentDto } from '../../dto/run-agent.dto.js';
+import { ResumeInterruptDto } from '../../dto/resume-interrupt.dto.js';
+import { CommandApprovalMode } from '../../../settings/enums/command-approval-mode.js';
 
 @Injectable()
 export class AgentService {

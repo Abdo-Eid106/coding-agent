@@ -5,12 +5,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   AgentEventEnum,
   TokenEvent,
-} from '../../interfaces/agent-stream-event.js';
+} from '../../../interfaces/agent-stream-event.js';
 import {
   Message,
   MessageRole,
-} from '../../../../database/entities/message.entity.js';
-import { AppEvent } from '../../../events/enums/app-events.enum.js';
+} from '../../../../../database/entities/message.entity.js';
+import { AppEvent } from '../../../../events/enums/app-events.enum.js';
 
 type ChatModelStreamHandle = Omit<ChatModelStream, 'then'>;
 

@@ -12,9 +12,9 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { Injectable } from '@nestjs/common';
 import z from 'zod';
 
-import { createModel } from './create-model.js';
-import { ToolManager } from '../providers/tool-manager.js';
-import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
+import { ModelFactory } from '../../factories/model-factory.js';
+import { ToolManager } from '../tool-manager.js';
+import { CommandApprovalMode } from '../../../settings/enums/command-approval-mode.js';
 
 const createSystemPrompt = (workingDirectory?: string) =>
   new SystemMessage(
@@ -68,9 +68,9 @@ export class AgentGraphFactory {
         const { apiKey, modelId, baseUrl, provider } =
           runtime.context!.modelConfig;
 
-        const tools = await this.toolManager.getTools();
+        const tools = this.toolManager.getTools();
 
-        const modelWithTools = createModel({
+        const modelWithTools = ModelFactory({
           apiKey,
           modelId,
           baseUrl,
@@ -85,7 +85,7 @@ export class AgentGraphFactory {
         return { messages: [response] };
       })
       .addNode('tools', async (state, config) => {
-        const tools = await this.toolManager.getTools();
+        const tools = this.toolManager.getTools();
         const toolNode = new ToolNode(tools);
 
         return toolNode.invoke({ messages: state.messages }, config);

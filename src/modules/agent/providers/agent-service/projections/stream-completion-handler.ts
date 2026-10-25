@@ -3,8 +3,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   AgentEventEnum,
   AgentStreamEvent,
-} from '../../interfaces/agent-stream-event.js';
-import { AppEvent } from '../../../events/enums/app-events.enum.js';
+} from '../../../interfaces/agent-stream-event.js';
+import { AppEvent } from '../../../../events/enums/app-events.enum.js';
 import { GraphStream } from '../agent-graph.factory.js';
 
 @Injectable()

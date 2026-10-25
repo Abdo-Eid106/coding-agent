@@ -9,7 +9,7 @@ type ModelConfig = {
   provider: string;
 };
 
-export function createModel(config: ModelConfig) {
+export function ModelFactory(config: ModelConfig) {
   if (config.baseUrl) {
     return new ChatOpenAI({
       model: config.modelId,

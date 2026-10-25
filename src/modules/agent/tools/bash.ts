@@ -11,7 +11,7 @@ import { promisify } from 'node:util';
 import z from 'zod';
 import { classifyCommand, CommandDecision } from './classify-command.js';
 import { CommandApprovalMode } from '../../settings/enums/command-approval-mode.js';
-import { AgentGraphContext } from '../langchain/agent-graph.factory.js';
+import { AgentGraphContext } from '../providers/agent-service/agent-graph.factory.js';
 
 const execAsync = promisify(exec);
 

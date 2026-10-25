@@ -13,7 +13,7 @@ import {
 
 import { CreateSessionDto } from '../dto/create-session.dto.js';
 import { GetModel } from '../../providers/use-cases/get-model.use-case.js';
-import { createModel } from '../../agent/langchain/create-model.js';
+import { ModelFactory } from '../../agent/factories/model-factory.js';
 import { AppEvent } from '../../events/enums/app-events.enum.js';
 
 const TITLE_SYSTEM_PROMPT =
@@ -86,7 +86,7 @@ export class CreateSession {
     const aiModel = await this.getModel.execute(modelId);
     const provider = aiModel.provider;
 
-    const model = createModel({
+    const model = ModelFactory({
       modelId: aiModel.id,
       apiKey: provider.apiKey!,
       baseUrl: provider.baseUrl,
