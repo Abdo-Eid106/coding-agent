@@ -33,7 +33,7 @@ export class SessionController {
 
   @Get('running')
   getRunningSessions() {
-    return this.sessionManager.getRunninSessions();
+    return this.sessionManager.getRunningSessions();
   }
 
   @Get()

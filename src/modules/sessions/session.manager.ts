@@ -37,7 +37,7 @@ export class SessionManager {
     });
   }
 
-  getRunninSessions() {
+  getRunningSessions() {
     return [...this.sessions.keys()];
   }
 
