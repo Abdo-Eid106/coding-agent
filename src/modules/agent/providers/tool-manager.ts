@@ -1,43 +1,29 @@
-import path from 'node:path';
-import { readFile } from 'node:fs/promises';
-import { MCPAdapter } from '@langchain/mcp-adapters';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import type { StructuredToolInterface } from '@langchain/core/tools';
+
 import { builtInTools } from '../tools/index.js';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-
-const configPath = path.resolve(process.cwd(), 'config/mcp.json');
-
-interface McpServerConfig {
-  [serverName: string]: any;
-}
+import { McpService } from './mcp.service.js';
 
 @Injectable()
-export class ToolManager implements OnModuleInit, OnModuleDestroy {
-  private tools: StructuredToolInterface[] = [];
-  private adapter?: MCPAdapter;
+export class ToolManager implements OnModuleInit {
+  private tools: StructuredToolInterface[] = [...builtInTools];
 
-  async init() {
-    const rawConfig = await readFile(configPath, 'utf8');
-    const config: { servers: McpServerConfig } = JSON.parse(rawConfig);
+  constructor(private readonly mcpService: McpService) {}
 
-    this.adapter = new MCPAdapter({
-      servers: config.servers,
-      prefixToolNameWithServerName: true,
-    });
+  async onModuleInit() {
+    await this.reload();
+  }
 
-    const mcpTools = await this.adapter.listTools();
+  async reload() {
+    const mcpTools = await this.mcpService.getTools({ reload: true });
     this.tools = [...builtInTools, ...mcpTools];
   }
 
-  async getTools(): Promise<StructuredToolInterface[]> {
+  getTools(): StructuredToolInterface[] {
     return this.tools;
   }
 
-  async onModuleInit() {
-    await this.init();
-  }
-
-  async onModuleDestroy() {
-    await this.adapter?.close();
+  getMcpServers() {
+    return this.mcpService.getServers();
   }
 }

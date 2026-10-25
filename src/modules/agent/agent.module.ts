@@ -8,10 +8,12 @@ import { ToolsProjectionHandler } from './langchain/projections/tools-projection
 import { StreamCompletionHandler } from './langchain/projections/stream-completion-handler.js';
 import { SessionModule } from '../sessions/sessions.module.js';
 import { AgentConroller } from './agent.controller.js';
+import { McpService } from './providers/mcp.service.js';
 
 @Module({
   imports: [SessionModule],
   providers: [
+    McpService,
     ToolManager,
     AgentService,
     AgentGraphFactory,
