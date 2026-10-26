@@ -26,38 +26,32 @@
    npm install -g pnpm
    ```
 
-3. Install the NestJS CLI:
-
-   ```bash
-   pnpm add -g @nestjs/cli
-   ```
-
-4. Clone the repository and navigate to the project directory:
+3. Clone the repository and navigate to the project directory:
 
    ```bash
    git clone <repository-url>
    cd <project-directory>
    ```
 
-5. Install dependencies:
+4. Install dependencies:
 
    ```bash
    pnpm install --frozen-lockfile
    ```
 
-6. Build the project:
+5. Build the project:
 
    ```bash
    pnpm run build
    ```
 
-7. Run database migrations:
+6. Run database migrations:
 
    ```bash
    pnpm run migration:up
    ```
 
-8. Start the application in production mode:
+7. Start the application in production mode:
    ```bash
    pnpm run start:prod
    ```
