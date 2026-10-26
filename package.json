@@ -37,6 +37,7 @@
     "@langchain/core": "^1.2.17",
     "@langchain/google": "^0.2.10",
     "@langchain/langgraph": "^1.4.21",
+    "@langchain/langgraph-checkpoint-sqlite": "^1.1.0",
     "@langchain/mcp-adapters": "^2.0.1",
     "@langchain/openai": "^1.6.2",
     "@langchain/protocol": "^0.0.19",

@@ -5,12 +5,20 @@ import {
   START,
   StateGraph,
   StateSchema,
-  MemorySaver,
   GraphRunStream,
+  MemorySaver,
 } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { SqliteSaver } from '@langchain/langgraph-checkpoint-sqlite';
 import { Injectable } from '@nestjs/common';
+import fs from 'node:fs';
+import path from 'node:path';
 import z from 'zod';
+
+const dataDirectory = path.resolve(process.cwd(), 'data');
+fs.mkdirSync(dataDirectory, { recursive: true });
+const databasePath = path.join(dataDirectory, 'app.sqlite');
+const checkpointer = SqliteSaver.fromConnString(databasePath);
 
 import { ModelFactory } from '../../factories/model-factory.js';
 import { ToolManager } from '../tool-manager.js';
@@ -107,9 +115,7 @@ export class AgentGraphFactory {
         },
       )
       .addEdge('tools', 'agent')
-      .compile({
-        checkpointer: new MemorySaver(),
-      });
+      .compile({ checkpointer });
   }
 }
 

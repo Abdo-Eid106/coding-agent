@@ -62,3 +62,4 @@ config
 
 #sqlite data
 *.sqlite
+data
