@@ -24,19 +24,6 @@ export class UpdateProvider {
       throw new ConflictException('Duplicate model IDs are not allowed.');
     }
 
-    const existingModelCount = modelIds.length
-      ? await this.em.count(AIModel, {
-          id: { $in: modelIds },
-          provider: { id: { $ne: id } },
-        })
-      : 0;
-
-    if (existingModelCount > 0) {
-      throw new ConflictException(
-        'One or more of the specified AI models already exist.',
-      );
-    }
-
     this.em.assign(provider, {
       displayName: dto.displayName,
       baseUrl: dto.baseUrl,

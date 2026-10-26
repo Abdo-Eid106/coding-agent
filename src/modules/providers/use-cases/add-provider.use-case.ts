@@ -16,21 +16,9 @@ export class AddProvider {
       throw new ConflictException('Duplicate model IDs are not allowed.');
     }
 
-    const [existingProviderCount, existingModelCount] = await Promise.all([
-      this.em.count(Provider, { id }),
-      modelIds.length > 0
-        ? this.em.count(AIModel, { id: { $in: modelIds } })
-        : 0,
-    ]);
-
+    const existingProviderCount = await this.em.count(Provider, { id });
     if (existingProviderCount > 0) {
       throw new ConflictException(`Provider with ID '${id}' already exists.`);
-    }
-
-    if (existingModelCount > 0) {
-      throw new ConflictException(
-        'One or more of the specified AI models already exist.',
-      );
     }
 
     const provider = this.em.create(Provider, {
