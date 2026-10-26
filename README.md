@@ -42,7 +42,7 @@
 5. Install dependencies:
 
    ```bash
-   pnpm install
+   pnpm install --frozen-lockfile
    ```
 
 6. Build the project:
@@ -160,4 +160,3 @@ To extend the agent with custom tools via the Model Context Protocol (MCP), you 
 ### 18. Theme Customization
 
 ![Theme Customization](https://res.cloudinary.com/djo9k9gbx/image/upload/v1793041946/16-theme_lbfaff.png)
-
