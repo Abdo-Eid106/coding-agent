@@ -30,12 +30,9 @@
     "migration:log": "mikro-orm migration:log",
     "migration:unlog": "mikro-orm migration:unlog",
     "migration:rollup": "mikro-orm migration:rollup",
-    "seeder:create": "mikro-orm seeder:create",
-    "seeder:run": "mikro-orm seeder:run",
-    "seed": "mikro-orm seeder:run -- --class=DatabaseSeeder"
+    "seeder:create": "mikro-orm seeder:create"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.6.0",
     "@langchain/anthropic": "^1.5.12",
     "@langchain/core": "^1.2.17",
     "@langchain/google": "^0.2.10",
@@ -46,8 +43,6 @@
     "@mikro-orm/core": "^7.2.5",
     "@mikro-orm/decorators": "^7.2.5",
     "@mikro-orm/nestjs": "^7.1.0",
-    "@mikro-orm/postgresql": "^7.2.5",
-    "@mikro-orm/seeder": "^7.2.5",
     "@mikro-orm/sqlite": "^7.2.5",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.1",
@@ -64,7 +59,6 @@
     "dotenv": "^18.0.7",
     "fast-glob": "^3.3.3",
     "langchain": "^1.5.16",
-    "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "shell-quote": "^1.12.0",
@@ -82,7 +76,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
-    "@types/pg": "^8.23.1",
     "@types/shell-quote": "^1.7.5",
     "@types/supertest": "^7.0.0",
     "@types/turndown": "^5.0.6",
