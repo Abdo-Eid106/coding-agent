@@ -37,7 +37,7 @@ export async function view(
 export const viewTool = tool(
   async (input, config?: RunnableConfig) => {
     const content = await view(input, config?.signal);
-    return { content };
+    return JSON.stringify({ content });
   },
   {
     name: 'view',

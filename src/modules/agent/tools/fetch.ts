@@ -45,7 +45,7 @@ export const fetchTool = tool(
       format,
       signal: config?.signal,
     });
-    return { content };
+    return JSON.stringify({ content });
   },
   {
     name: 'fetch',

@@ -55,7 +55,7 @@ export function grep(
 export const grepTool = tool(
   async (input, config?: RunnableConfig) => {
     const content = await grep(input, config?.signal);
-    return { content };
+    return JSON.stringify({ content });
   },
   {
     name: 'grep',

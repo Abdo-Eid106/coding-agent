@@ -64,7 +64,7 @@ export async function glob(
 
 export const globTool = tool(
   async (input, config?: RunnableConfig) => {
-    return await glob(input, config?.signal);
+    return JSON.stringify(await glob(input, config?.signal));
   },
   {
     name: 'glob',

@@ -86,7 +86,7 @@ export async function ls(
 
 export const lsTool = tool(
   async (input, config?: RunnableConfig) => {
-    return await ls(input, config?.signal);
+    return JSON.stringify(await ls(input, config?.signal));
   },
   {
     name: 'ls',

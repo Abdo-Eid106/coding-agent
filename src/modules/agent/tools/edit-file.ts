@@ -57,7 +57,9 @@ export async function editFile(
 
 export const editFileTool = tool(
   async ({ filePath, oldText, newText }, config?: RunnableConfig) => {
-    return await editFile(filePath, oldText, newText, config?.signal);
+    return JSON.stringify(
+      await editFile(filePath, oldText, newText, config?.signal),
+    );
   },
   {
     name: 'edit_file',

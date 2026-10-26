@@ -31,7 +31,9 @@ export async function write(
 export const writeTool = tool(
   async (input, config?: RunnableConfig) => {
     await write(input, config?.signal);
-    return { content: `Successfully wrote to file: ${input.filePath}` };
+    return JSON.stringify({
+      content: `Successfully wrote to file: ${input.filePath}`,
+    });
   },
   {
     name: 'write',
