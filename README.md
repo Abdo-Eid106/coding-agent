@@ -1,6 +1,7 @@
 # AI Coding Agent
 
 - A lightweight, cross-platform coding agent that runs right in your browser.
+
 ## Features
 
 - **Cross-Platform Built-in Tools** — Includes `bash`, `ls`, `write`, `edit`, `view`, `grep`, `glob`, and `fetch`, designed to work across different operating systems.
@@ -60,6 +61,31 @@
    ```bash
    pnpm run start:prod
    ```
+
+## Configuration
+
+### Adding MCP Servers
+
+To extend the agent with custom tools via the Model Context Protocol (MCP), you need to set up your servers configuration file:
+
+1. Create a directory named `config` in the root of your project directory.
+2. Inside the `config/` folder, create a file named `mcp.json`.
+3. Add your MCP servers using the following example structure:
+
+```json
+{
+  "servers": {
+    "context7": {
+      "url": "[https://mcp.context7.com/mcp](https://mcp.context7.com/mcp)",
+      "headers": {
+        "CONTEXT7_API_KEY": "your_api_key"
+      }
+    }
+  }
+}
+```
+
+4. Head over to the UI settings, navigate to the MCP tab, and click the Reload MCP button to load your newly added servers.
 
 ## Screenshots
 
@@ -127,10 +153,11 @@
 
 ![Edit Tool Call](https://res.cloudinary.com/djo9k9gbx/image/upload/v1793041943/14-edit-tool-call_xaifek.png)
 
-### 17. Fetch Problem-Solving Accounts
+### 17. Fetch Tool Call
 
 ![Fetch Problem-Solving Accounts](https://res.cloudinary.com/djo9k9gbx/image/upload/v1793041949/15-fetch-problem-solving-accounts_c8hvnv.png)
 
 ### 18. Theme Customization
 
 ![Theme Customization](https://res.cloudinary.com/djo9k9gbx/image/upload/v1793041946/16-theme_lbfaff.png)
+
