@@ -5,6 +5,7 @@ import {
   DoneEvent,
   Interrupt,
   InterruptEvent,
+  ErrorEvent,
 } from '../../../interfaces/agent-event.js';
 import { AppEvent } from '../../../enums/app-events.enum.js';
 import { GraphStream } from '../agent-graph.factory.js';
@@ -42,12 +43,16 @@ export class StreamCompletionHandler {
     } catch (error: unknown) {
       if (this.isAbortError(error)) return;
 
-      this.eventEmitter.emit(AppEvent.AGENT_EVENT, {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred',
-      });
+      const message =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+
+      const event: ErrorEvent = {
+        type: AgentEventEnum.ERROR,
+        context: {},
+        data: { message },
+      };
+
+      this.eventEmitter.emit(AppEvent.AGENT_EVENT, event);
     }
   }
 
