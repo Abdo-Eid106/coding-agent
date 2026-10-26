@@ -12,6 +12,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AgentModule } from './modules/agent/agent.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
 import { APP_PIPE } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { cwd } from 'process';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -19,6 +22,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   imports: [
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
+    // ObserveModule,
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     ProjectModule,
@@ -28,6 +32,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     EventEmitterModule.forRoot({}),
     AgentModule,
     SettingsModule,
+    ServeStaticModule.forRoot({ rootPath: join(cwd(), 'frontend') }),
   ],
   controllers: [AppController],
   providers: [
