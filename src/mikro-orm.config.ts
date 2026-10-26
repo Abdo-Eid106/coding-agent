@@ -1,12 +1,16 @@
 import 'dotenv/config';
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, SqliteDriver } from '@mikro-orm/sqlite';
 import { Migrator } from '@mikro-orm/migrations';
 import { entities } from './database/entities/entities.js';
 
+const dataDirectory = path.resolve(process.cwd(), 'data');
+fs.mkdirSync(dataDirectory, { recursive: true });
+
 export default defineConfig({
-  dbName: path.resolve(process.cwd(), 'data', 'app.sqlite'),
+  dbName: path.join(dataDirectory, 'app.sqlite'),
   entities,
   extensions: [Migrator],
   driver: SqliteDriver,
