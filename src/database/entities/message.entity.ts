@@ -6,11 +6,11 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/decorators/legacy';
-import { randomUUIDv7 } from 'node:crypto';
 import { Session } from './session.entity.js';
 import { Collection, type Opt } from '@mikro-orm/core';
 import { ToolCall } from './tool-call.entity.js';
 import { CommandApprovalMode } from '../../modules/settings/enums/command-approval-mode.js';
+import { v7 } from 'uuid';
 
 export enum MessageRole {
   USER = 'user',
@@ -20,7 +20,7 @@ export enum MessageRole {
 @Entity()
 export class Message {
   @PrimaryKey({ type: 'uuid' })
-  id: string = randomUUIDv7();
+  id: string = v7();
 
   @Property({ type: 'text' })
   content: string;
