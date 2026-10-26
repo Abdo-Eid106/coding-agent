@@ -83,37 +83,41 @@ export class CreateSession {
     modelId: string,
     messageContent: string,
   ) {
-    const aiModel = await this.getModel.execute(modelId);
-    const provider = aiModel.provider;
+    try {
+      const aiModel = await this.getModel.execute(modelId);
+      const provider = aiModel.provider;
 
-    const model = ModelFactory({
-      modelId: aiModel.id,
-      apiKey: provider.apiKey!,
-      baseUrl: provider.baseUrl,
-      provider: aiModel.provider.id,
-    });
+      const model = ModelFactory({
+        modelId: aiModel.id,
+        apiKey: provider.apiKey!,
+        baseUrl: provider.baseUrl,
+        provider: aiModel.provider.id,
+      });
 
-    const response = await model.invoke([
-      new SystemMessage(TITLE_SYSTEM_PROMPT),
-      new HumanMessage(messageContent),
-    ]);
+      const response = await model.invoke([
+        new SystemMessage(TITLE_SYSTEM_PROMPT),
+        new HumanMessage(messageContent),
+      ]);
 
-    const title =
-      typeof response.content === 'string'
-        ? response.content.trim()
-        : response.content
-            .filter((block) => block.type === 'text')
-            .map((block) => block.text)
-            .join('')
-            .trim();
+      const title =
+        typeof response.content === 'string'
+          ? response.content.trim()
+          : response.content
+              .filter((block) => block.type === 'text')
+              .map((block) => block.text)
+              .join('')
+              .trim();
 
-    const em = this.em.fork();
-    const session = await em.findOne(Session, {
-      id: sessionId,
-    });
-    if (!session) return;
-    session.title = title;
+      const em = this.em.fork();
+      const session = await em.findOne(Session, {
+        id: sessionId,
+      });
+      if (!session) return;
+      session.title = title;
 
-    await em.flush();
+      await em.flush();
+    } catch (err) {
+      this.logger.warn(err);
+    }
   }
 }
